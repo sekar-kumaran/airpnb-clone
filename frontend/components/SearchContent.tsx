@@ -3,189 +3,284 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, Heart, SlidersHorizontal, Star } from "lucide-react";
+import { Heart, SlidersHorizontal, Star, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import FilterModal from "@/components/FilterModal";
 import type { Category, ListingCard } from "@/types";
 
+function formatINR(n: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR", maximumFractionDigits: 0,
+  }).format(n);
+}
+
+// ── Quick filter pills ────────────────────────────────────────────────────────
+const QUICK_FILTERS = [
+  "Allows pets", "Free parking", "Free cancellation", "1+ bathrooms",
+  "Air conditioning", "Hot tub", "Self check-in", "1+ beds", "Kitchen", "Wifi",
+];
+
+// ── Individual result card ────────────────────────────────────────────────────
+function ResultCard({ listing }: { listing: ListingCard }) {
+  const [saved, setSaved] = useState(false);
+  const [imgIndex, setImgIndex] = useState(0);
+
+  const images = listing.cover_image
+    ? [listing.cover_image, listing.cover_image, listing.cover_image]
+    : [];
+
+  return (
+    <div className="group">
+      {/* Image */}
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+        {images[imgIndex] ? (
+          <Image
+            src={images[imgIndex]}
+            alt={listing.title}
+            fill
+            className="object-cover transition duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 320px"
+          />
+        ) : (
+          <div className="h-full w-full bg-gray-200" />
+        )}
+
+        {/* Heart */}
+        <button
+          onClick={() => setSaved(!saved)}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center"
+        >
+          <Heart className={`h-6 w-6 drop-shadow-md ${saved ? "fill-primary stroke-primary" : "fill-black/30 stroke-white"}`} />
+        </button>
+
+        {/* Guest favourite badge */}
+        {(listing.rating ?? 0) >= 4.9 && (
+          <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold shadow">
+            Guest favourite
+          </span>
+        )}
+
+        {/* Image carousel dots */}
+        {images.length > 1 && (
+          <>
+            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1">
+              {images.map((_, i) => (
+                <button key={i} onClick={() => setImgIndex(i)}
+                  className={`h-1.5 w-1.5 rounded-full transition ${i === imgIndex ? "bg-white" : "bg-white/50"}`}
+                />
+              ))}
+            </div>
+            <button onClick={() => setImgIndex(Math.max(0, imgIndex - 1))}
+              className="absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 opacity-0 shadow group-hover:opacity-100 transition">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button onClick={() => setImgIndex(Math.min(images.length - 1, imgIndex + 1))}
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 opacity-0 shadow group-hover:opacity-100 transition">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Card info */}
+      <Link href={`/listing/${listing.id}`} className="block pt-3">
+        <div className="flex items-start justify-between gap-2">
+          <p className="truncate text-sm font-semibold text-gray-900">{listing.title}</p>
+          {listing.rating && (
+            <div className="flex shrink-0 items-center gap-0.5 text-sm">
+              <Star className="h-3.5 w-3.5 fill-current text-gray-800" />
+              <span className="font-semibold">{listing.rating.toFixed(1)}</span>
+              <span className="text-gray-500">({listing.review_count})</span>
+            </div>
+          )}
+        </div>
+        <p className="mt-0.5 text-sm text-gray-500">{listing.city}, {listing.country}</p>
+        <p className="text-sm text-gray-500">1 bedroom · 1 bed · 1 bathroom</p>
+        <p className="mt-1 text-sm">
+          <span className="font-semibold">{formatINR(listing.price_per_night)}</span>{" "}
+          <span className="text-gray-500">for 1 night</span>
+        </p>
+        <p className="text-xs text-gray-500 mt-0.5">Free cancellation</p>
+      </Link>
+    </div>
+  );
+}
+
+// ── Map with price pins ───────────────────────────────────────────────────────
+function MapPanel({ listings }: { listings: ListingCard[] }) {
+  return (
+    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-gray-100">
+      {/* Static map background */}
+      <Image
+        src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1200&q=70"
+        alt="Map"
+        fill
+        className="object-cover opacity-70"
+        sizes="700px"
+      />
+      {/* Price pins */}
+      {listings.slice(0, 14).map((listing, i) => (
+        <Link
+          key={`pin-${listing.id}`}
+          href={`/listing/${listing.id}`}
+          className="absolute rounded-full bg-white px-2.5 py-1 text-xs font-bold shadow-lg ring-1 ring-black/10 transition hover:scale-110 hover:z-10 hover:bg-gray-900 hover:text-white"
+          style={{
+            left: `${8 + ((i * 14) % 75)}%`,
+            top: `${5 + ((i * 17) % 82)}%`,
+          }}
+        >
+          {formatINR(listing.price_per_night * 2)}
+        </Link>
+      ))}
+      {/* Map attribution */}
+      <div className="absolute bottom-2 right-3 text-[10px] text-gray-600 bg-white/80 px-1.5 py-0.5 rounded">
+        Map Data ©2026 · Terms
+      </div>
+      {/* Expand button */}
+      <button className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow">
+        <MapPin className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+function Pagination({ page, totalPages, pageHref }: { page: number; totalPages: number; pageHref: (p: number) => string }) {
+  if (totalPages <= 1) return null;
+
+  function pages(): (number | "...")[] {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (page <= 4) return [1, 2, 3, 4, "...", totalPages];
+    if (page >= totalPages - 3) return [1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, "...", page - 1, page, page + 1, "...", totalPages];
+  }
+
+  return (
+    <div className="mt-10 flex items-center justify-center gap-1">
+      <Link href={page > 1 ? pageHref(page - 1) : "#"}
+        className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition hover:bg-gray-100 ${page <= 1 ? "pointer-events-none text-gray-300" : ""}`}>
+        <ChevronLeft className="h-4 w-4" />
+      </Link>
+      {pages().map((p, i) =>
+        p === "..." ? (
+          <span key={`dots-${i}`} className="px-1 text-sm text-gray-400">...</span>
+        ) : (
+          <Link key={p} href={pageHref(p as number)}
+            className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition ${
+              p === page ? "bg-gray-900 text-white" : "hover:bg-gray-100 text-gray-700"
+            }`}
+          >
+            {p}
+          </Link>
+        )
+      )}
+      <Link href={page < totalPages ? pageHref(page + 1) : "#"}
+        className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition hover:bg-gray-100 ${page >= totalPages ? "pointer-events-none text-gray-300" : ""}`}>
+        <ChevronRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
+}
+
+// ── Main SearchContent ────────────────────────────────────────────────────────
 interface SearchContentProps {
   listings: ListingCard[];
   total: number;
   page: number;
   limit: number;
   searchParams: {
-    location?: string;
-    min_price?: string;
-    max_price?: string;
-    property_type?: string;
-    guests?: string;
-    checkin?: string;
-    checkout?: string;
-    category_id?: string;
-    page?: string;
+    location?: string; min_price?: string; max_price?: string;
+    property_type?: string; guests?: string; checkin?: string;
+    checkout?: string; category_id?: string; page?: string;
   };
   categories: Category[];
 }
 
-function ResultCard({ listing, featured = false }: { listing: ListingCard; featured?: boolean }) {
-  return (
-    <Link
-      href={`/listing/${listing.id}`}
-      className={`group block overflow-hidden bg-white transition ${
-        featured ? "rounded-[32px] p-5 shadow-xl shadow-gray-200/80" : "rounded-[28px]"
-      }`}
-    >
-      <div className={featured ? "grid items-center gap-10 md:grid-cols-[300px_1fr]" : ""}>
-        <div className={`relative overflow-hidden bg-gray-100 ${featured ? "h-[300px] rounded-[26px]" : "aspect-square rounded-[22px]"}`}>
-          {listing.cover_image && (
-            <Image
-              src={listing.cover_image}
-              alt={listing.title}
-              fill
-              className="object-cover transition duration-300 group-hover:scale-105"
-              sizes={featured ? "320px" : "(max-width: 1024px) 50vw, 260px"}
-            />
-          )}
-          {(listing.rating ?? 5) >= 4.9 && (
-            <span className="absolute left-4 top-4 rounded-full bg-white px-4 py-2 text-sm font-bold shadow">
-              Guest favourite
-            </span>
-          )}
-          <span className="absolute right-4 top-4 rounded-full bg-white/90 p-3 shadow">
-            <Heart className="h-5 w-5" />
-          </span>
-          {featured && (
-            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
-              {[0, 1, 2, 3].map((dot) => (
-                <span key={dot} className={`h-2 w-2 rounded-full ${dot === 0 ? "bg-white" : "bg-white/60"}`} />
-              ))}
-            </div>
-          )}
-        </div>
-        <div className={featured ? "" : "pt-3"}>
-          <h2 className={`${featured ? "text-[26px]" : "text-lg"} font-bold leading-tight text-gray-900`}>
-            {listing.title}
-          </h2>
-          <p className={`${featured ? "mt-3 text-2xl" : "mt-1 text-sm"} text-gray-500`}>
-            {featured ? "Skywatch by CasaFlip - Penthouse 2BH..." : `${listing.city}, ${listing.country}`}
-          </p>
-          {featured && (
-            <>
-              <p className="mt-1 text-2xl leading-snug text-gray-500">2 bedrooms · 2 beds · 2 private bathrooms</p>
-              <p className="mt-1 text-2xl text-gray-500">11-13 Sept</p>
-            </>
-          )}
-          <div className={`${featured ? "mt-7 text-2xl" : "mt-1 text-sm"} flex items-end justify-between gap-4`}>
-            <span>
-              {featured && <span className="mr-2 text-gray-500 line-through">${listing.price_per_night * 4}</span>}
-              <strong>${listing.price_per_night * 2}</strong>
-              <span className="text-gray-500"> for 2 nights</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <Star className={`${featured ? "h-6 w-6" : "h-4 w-4"} fill-current`} />
-              {listing.rating?.toFixed(2) || "5.0"}
-              {featured && <span className="text-gray-500">({listing.review_count || 51})</span>}
-            </span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 export default function SearchContent({ listings, total, page, limit, searchParams }: SearchContentProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const totalPages = Math.max(1, Math.ceil(total / limit));
-  const place = searchParams.location || "North Goa";
-  const [featured, ...rest] = listings;
+  const place = searchParams.location || "all homes";
 
   function pageHref(nextPage: number) {
     const params = new URLSearchParams();
-    Object.entries(searchParams).forEach(([key, value]) => {
-      if (value && key !== "page") params.set(key, value);
-    });
+    Object.entries(searchParams).forEach(([k, v]) => { if (v && k !== "page") params.set(k, v); });
     if (nextPage > 1) params.set("page", String(nextPage));
     return `/search${params.toString() ? `?${params.toString()}` : ""}`;
   }
 
+  function toggleFilter(f: string) {
+    setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
+  }
+
   return (
-    <div className="border-t bg-white">
-      <div className="mx-auto flex max-w-[1800px] justify-center gap-3 px-6 py-7">
-        <button onClick={() => setIsFilterOpen(true)} className="flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold hover:border-black">
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </button>
-        <button className="rounded-full border px-5 py-3 text-sm font-semibold hover:border-black">Price</button>
-        <button className="rounded-full border px-5 py-3 text-sm font-semibold hover:border-black">Type of place</button>
+    <div className="min-h-screen bg-white">
+      {/* ── Filter row ── */}
+      <div className="sticky top-[72px] z-20 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-3 overflow-x-auto px-6 py-3 no-scrollbar">
+          {/* Filters button */}
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="flex shrink-0 items-center gap-2 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold hover:border-gray-600 transition"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filters
+          </button>
+
+          {/* Quick-filter pills */}
+          {QUICK_FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => toggleFilter(f)}
+              className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition whitespace-nowrap ${
+                activeFilters.includes(f)
+                  ? "border-gray-900 bg-gray-900 text-white"
+                  : "border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="grid min-h-screen gap-14 px-8 pb-12 lg:grid-cols-[minmax(620px,850px)_1fr] lg:px-[60px]">
-        <section className="pt-8">
-          <div className="mb-10 flex items-center justify-between">
-            <h1 className="text-[28px] font-bold tracking-tight">Over 1,000 homes in {place}</h1>
-            <div className="hidden items-center gap-3 text-lg font-semibold md:flex">
-              <span className="text-3xl">🏷</span>
-              Prices include all fees
+      {/* ── Two-column layout ── */}
+      <div className="grid lg:grid-cols-[1fr_45%] lg:gap-0">
+        {/* Left: results */}
+        <section className="min-h-screen px-6 py-8 lg:px-10">
+          {/* Count */}
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-lg font-semibold text-gray-900">
+              {total > 0 ? `${total.toLocaleString()} place${total !== 1 ? "s" : ""}` : "No places"} in {place}
+            </h1>
+            <div className="hidden items-center gap-2 text-sm font-semibold md:flex">
+              <span>🏷️</span> Prices include all fees
             </div>
           </div>
 
-          {featured ? (
+          {listings.length > 0 ? (
             <>
-              <ResultCard listing={featured} featured />
-              <div className="mt-10 grid gap-x-8 gap-y-10 md:grid-cols-2">
-                {rest.map((listing) => (
+              <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2">
+                {listings.map((listing) => (
                   <ResultCard key={listing.id} listing={listing} />
                 ))}
               </div>
+              <Pagination page={page} totalPages={totalPages} pageHref={pageHref} />
             </>
           ) : (
-            <div className="rounded-3xl border bg-gray-50 p-12 text-center text-gray-500">
-              No homes found. Try adjusting your filters.
-            </div>
-          )}
-
-          {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-3">
-              {page > 1 && (
-                <Link href={pageHref(page - 1)} className="rounded-xl border px-5 py-2 text-sm font-semibold hover:bg-gray-50">
-                  Previous
-                </Link>
-              )}
-              <span className="text-sm text-gray-500">
-                Page {page} of {totalPages}
-              </span>
-              {page < totalPages && (
-                <Link href={pageHref(page + 1)} className="rounded-xl bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-black">
-                  Show more
-                </Link>
-              )}
+            <div className="flex flex-col items-center rounded-3xl border border-gray-200 bg-gray-50 p-16 text-center">
+              <span className="text-4xl mb-4">🔍</span>
+              <p className="text-lg font-semibold text-gray-800">No exact matches</p>
+              <p className="mt-2 text-sm text-gray-500">Try adjusting your dates, location, or filters.</p>
+              <Link href="/search" className="mt-5 rounded-xl border border-gray-900 px-5 py-2 text-sm font-semibold hover:bg-gray-900 hover:text-white transition">
+                Clear filters
+              </Link>
             </div>
           )}
         </section>
 
-        <aside className="sticky top-[120px] hidden h-[calc(100vh-140px)] overflow-hidden rounded-[26px] bg-[#e7f2d8] lg:block">
-          <div className="relative h-full w-full bg-[radial-gradient(circle_at_20%_20%,#f7fbef_0_10%,transparent_11%),linear-gradient(135deg,#eef7dd,#faf6ed_45%,#d5edcd)]">
-            <div className="absolute right-7 top-7 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow">
-              <ExternalLink className="h-5 w-5" />
-            </div>
-            <div className="absolute right-7 top-24 overflow-hidden rounded-full bg-white shadow">
-              <button className="block h-12 w-12 text-3xl">+</button>
-              <button className="block h-12 w-12 border-t text-3xl">-</button>
-            </div>
-            {listings.slice(0, 16).map((listing, index) => (
-              <Link
-                key={`pin-${listing.id}`}
-                href={`/listing/${listing.id}`}
-                className="absolute rounded-full bg-white px-3 py-2 text-base font-bold shadow-lg ring-1 ring-black/10 transition hover:scale-105"
-                style={{
-                  left: `${6 + ((index * 13) % 76)}%`,
-                  top: `${4 + ((index * 19) % 82)}%`,
-                }}
-              >
-                ${listing.price_per_night * 2}
-              </Link>
-            ))}
-            <span className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-600">Map Data ©2026 · Terms</span>
-          </div>
+        {/* Right: map */}
+        <aside className="sticky top-[115px] hidden h-[calc(100vh-115px)] overflow-hidden lg:block">
+          <MapPanel listings={listings} />
         </aside>
       </div>
 
