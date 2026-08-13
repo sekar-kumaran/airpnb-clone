@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Images } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ListingCard as ListingCardType } from "@/types";
 import ListingCard from "@/components/ListingCard";
 
@@ -20,55 +20,60 @@ export default function HomeShelf({
   const railRef = useRef<HTMLDivElement>(null);
   if (listings.length === 0) return null;
 
-  function scrollRail(direction: "left" | "right") {
-    railRef.current?.scrollBy({
-      left: direction === "left" ? -720 : 720,
-      behavior: "smooth",
-    });
+  function scroll(dir: "left" | "right") {
+    railRef.current?.scrollBy({ left: dir === "left" ? -600 : 600, behavior: "smooth" });
   }
 
   return (
-    <section className="mb-11">
+    <section className="mb-10">
+      {/* Header row */}
       <div className="mb-4 flex items-center justify-between">
         <div>
           <Link href={href} className="group inline-flex items-center gap-2">
-            <h2 className="text-[26px] font-bold leading-8 tracking-tight text-gray-950">{title}</h2>
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition group-hover:bg-gray-200">
-              <ArrowRight className="h-4 w-4" />
+            <h2 className="text-xl font-bold tracking-tight text-gray-900">{title}</h2>
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 transition group-hover:bg-gray-200">
+              <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
-          {subtitle && <p className="mt-1 text-base leading-5 text-gray-500">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-sm text-gray-500">{subtitle}</p>}
         </div>
-        <div className="hidden items-center gap-3 md:flex">
+
+        {/* Scroll buttons (desktop only) */}
+        <div className="hidden items-center gap-2 md:flex">
           <button
-            type="button"
-            onClick={() => scrollRail("left")}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition hover:bg-gray-200 hover:text-gray-900"
-            aria-label="Previous"
+            onClick={() => scroll("left")}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:border-gray-600 hover:text-gray-900 transition"
+            aria-label="Scroll left"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </button>
           <button
-            type="button"
-            onClick={() => scrollRail("right")}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 transition hover:bg-gray-200"
-            aria-label="Next"
+            onClick={() => scroll("right")}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:border-gray-600 hover:text-gray-900 transition"
+            aria-label="Scroll right"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div ref={railRef} className="no-scrollbar grid auto-cols-[226px] grid-flow-col gap-4 overflow-x-auto scroll-smooth pb-2">
-        {listings.slice(0, 7).map((listing) => (
+      {/* Horizontal scroll rail */}
+      <div
+        ref={railRef}
+        className="no-scrollbar grid auto-cols-[200px] grid-flow-col gap-4 overflow-x-auto scroll-smooth pb-2"
+      >
+        {listings.slice(0, 8).map((listing) => (
           <ListingCard key={`${title}-${listing.id}`} listing={listing} variant="shelf" />
         ))}
+        {/* "See all" card */}
         <Link
           href={href}
-          className="flex h-[216px] w-[226px] shrink-0 flex-col items-center justify-center rounded-[16px] border bg-white shadow-md transition hover:shadow-lg"
+          className="flex h-[190px] w-[200px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition hover:shadow-md"
         >
-          <Images className="mb-5 h-12 w-12 text-gray-500" />
-          <span className="font-bold">See all</span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+            <ArrowRight className="h-4 w-4" />
+          </span>
+          See all
         </Link>
       </div>
     </section>

@@ -27,14 +27,28 @@ AMENITIES = [
 ]
 
 CATEGORIES = [
-    ("Amazing views", "mountain"),
-    ("Cabins", "cabin"),
-    ("Trending", "flame"),
-    ("Beachfront", "waves"),
-    ("Tiny homes", "home"),
-    ("Iconic cities", "city"),
+    ("Amazing views", "amazing-views"),
+    ("Beachfront", "beachfront"),
+    ("Cabins", "cabins"),
+    ("Camping", "camping"),
+    ("Castles", "castles"),
+    ("Countryside", "countryside"),
+    ("Design", "design"),
+    ("Farms", "farms"),
+    ("Islands", "islands"),
+    ("Lakefront", "lakefront"),
+    ("Luxe", "luxe"),
+    ("National parks", "national-parks"),
+    ("New", "new"),
+    ("OMG!", "omg"),
+    ("Rooms", "rooms"),
+    ("Skiing", "skiing"),
+    ("Surfing", "surfing"),
+    ("Tiny homes", "tiny-homes"),
+    ("Treehouse", "treehouse"),
+    ("Trending", "trending"),
     ("Tropical", "tropical"),
-    ("Mansions", "mansion"),
+    ("Unique stays", "unique-stays"),
 ]
 
 LISTINGS = [
