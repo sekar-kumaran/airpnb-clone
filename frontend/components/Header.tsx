@@ -199,7 +199,7 @@ export default function Header() {
               className="hidden h-12 w-auto items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition lg:flex"
             >
               <span className="flex items-center gap-2 pl-6 pr-4 text-[14px] font-semibold">
-                {location ? (
+                {location && location !== "NEARBY" ? (
                   <>
                     <span className="truncate max-w-[200px]">{location}</span>
                   </>

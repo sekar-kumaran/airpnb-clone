@@ -225,8 +225,8 @@ export default function SearchContent({ listings, total, page, limit, searchPara
   return (
     <div className="min-h-screen bg-white">
       {/* ── Filter row ── */}
-      <div className="sticky top-[86px] z-20 border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-[1760px] items-center gap-3 overflow-x-auto px-6 py-4 md:px-10 xl:px-20 no-scrollbar">
+      <div className="sticky top-[86px] z-20 bg-white pt-2 pb-0">
+        <div className="mx-auto flex max-w-[1760px] items-center gap-3 overflow-x-auto px-6 py-2 md:px-10 xl:px-20 no-scrollbar">
           {/* Filters button */}
           <button
             onClick={() => setIsFilterOpen(true)}
@@ -292,7 +292,7 @@ export default function SearchContent({ listings, total, page, limit, searchPara
         </section>
 
         {/* Right: map */}
-        <aside className="sticky top-[115px] hidden h-[calc(100vh-115px)] overflow-hidden lg:block">
+        <aside className="sticky top-[146px] hidden h-[calc(100vh-146px)] lg:block pb-6 pr-6 xl:pr-20">
           <MapPanel listings={listings} />
         </aside>
       </div>
