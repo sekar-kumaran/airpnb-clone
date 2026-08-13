@@ -36,11 +36,11 @@ const DESTINATIONS = [
   { city: "North Goa, Goa", sub: "Popular beach destination", icon: Building2 },
 ];
 
-const navItems = [
-  { label: "All", href: "/", icon: Globe },
-  { label: "Homes", href: "/homes", icon: Home },
-  { label: "Experiences", href: "/experiences", icon: Landmark },
-  { label: "Services", href: "/services", icon: ConciergeBell },
+const navLinks = [
+  { label: "All", emoji: "🌍", id: "all" },
+  { label: "Homes", emoji: "🏡", id: "homes" },
+  { label: "Experiences", emoji: "🎈", id: "experiences" },
+  { label: "Services", emoji: "🛎️", id: "services" },
 ];
 
 // Build two consecutive months from today
@@ -86,13 +86,13 @@ function Logo() {
 export default function Header() {
   const pathname = usePathname();
   const compact = pathname.startsWith("/search") || pathname.startsWith("/listing");
-  const activePath = pathname === "/" ? "/" : `/${pathname.split("/")[1]}`;
   const router = useRouter();
 
   // UI state
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeField, setActiveField] = useState<"where" | "when" | "who">("where");
+  const [activeMode, setActiveMode] = useState<"all" | "homes" | "experiences" | "services">("all");
   const [location, setLocation] = useState("");
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
@@ -105,11 +105,6 @@ export default function Header() {
 
   const menuRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
-
-  const selectedNav = useMemo(
-    () => navItems.find((item) => item.href === activePath) || navItems[0],
-    [activePath]
-  );
 
   const MONTHS = useMemo(() => buildMonths(), []);
 
@@ -164,16 +159,9 @@ export default function Header() {
       ? `${adults + children} guest${adults + children === 1 ? "" : "s"}`
       : "Add guests";
 
-  const guestCounters = [
-    { label: "Adults", sub: "Ages 13 or above", value: adults, setter: setAdults, min: 0 },
-    { label: "Children", sub: "Ages 2–12", value: children, setter: setChildren, min: 0 },
-    { label: "Infants", sub: "Under 2", value: infants, setter: setInfants, min: 0 },
-    { label: "Pets", sub: "Bringing a service animal?", value: pets, setter: setPets, min: 0 },
-  ];
-
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-[1760px] px-6 py-3 sm:px-10">
+      <div className="mx-auto max-w-[1760px] px-6 py-5 md:px-10 xl:px-20">
         {/* ── Top row ── */}
         <div className="flex items-center justify-between gap-4">
           <Logo />
@@ -181,32 +169,28 @@ export default function Header() {
           {/* Centre: nav tabs (home) or compact search pill (search/listing) */}
           {!compact ? (
             <nav className="hidden items-center gap-6 lg:flex">
-              {navItems.map((item) => {
-                const active = selectedNav.href === item.href;
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={`flex items-center gap-1.5 border-b-2 pb-1 text-sm font-semibold transition-colors ${
-                      active
-                        ? "border-gray-900 text-gray-900"
-                        : "border-transparent text-gray-500 hover:text-gray-900"
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
+              {navLinks.map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => setActiveMode(link.id as any)}
+                  className={`flex flex-col items-center gap-1.5 pb-2 transition ${
+                    activeMode === link.id
+                      ? "border-b-2 border-gray-900 text-gray-900"
+                      : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"
+                  }`}
+                >
+                  <span className="text-2xl leading-none">{link.emoji}</span>
+                  <span className="text-sm font-semibold">{link.label}</span>
+                </button>
+              ))}
             </nav>
           ) : (
             <button
               type="button"
               onClick={() => openField("where")}
-              className="hidden h-12 max-w-[500px] flex-1 items-center rounded-full border border-gray-300 bg-white shadow-sm transition hover:shadow-md lg:flex"
+              className="hidden h-14 max-w-[500px] flex-1 items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition lg:flex"
             >
-              <span className="flex min-w-0 flex-1 items-center gap-2 px-4 text-left text-sm font-semibold">
-                <selectedNav.icon className="h-4 w-4 shrink-0" />
+              <span className="flex min-w-0 flex-1 items-center gap-2 px-6 text-left text-[15px] font-semibold">
                 <span className="truncate">{location ? `Homes in ${location}` : "Anywhere"}</span>
               </span>
               <span className="h-6 w-px bg-gray-200" />
@@ -225,29 +209,36 @@ export default function Header() {
               href="/host"
               className="hidden rounded-full px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 md:block"
             >
-              Airbnb your home
+              Become a host
             </Link>
             <button
               className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 md:flex"
               aria-label="Language"
             >
-              <Globe className="h-4 w-4" />
+              <Globe className="h-[18px] w-[18px]" />
             </button>
 
-            {/* Hamburger + user menu */}
-            <div className="relative" ref={menuRef}>
+            {/* Hamburger + user menu separate circles */}
+            <div className="relative flex items-center gap-2" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-10 items-center gap-2 rounded-full border border-gray-300 px-3 hover:shadow-md transition-shadow"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:shadow-md transition-shadow"
                 aria-label="Open menu"
               >
                 <Menu className="h-4 w-4" />
+              </button>
+
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
+                aria-label="User profile"
+              >
                 {user ? (
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-sm font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <UserCircle className="h-6 w-6 text-gray-500" />
+                  <UserCircle className="h-8 w-8 text-gray-500" />
                 )}
               </button>
 
@@ -255,25 +246,25 @@ export default function Header() {
                 <div className="absolute right-0 z-50 mt-2 w-64 rounded-2xl bg-white py-2 shadow-2xl ring-1 ring-black/5">
                   {user ? (
                     <>
-                      <div className="border-b px-4 py-3">
-                        <p className="font-semibold text-sm">{user.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      </div>
-                      <Link href="/users/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Profile</Link>
-                      <Link href="/account-settings" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Account</Link>
-                      <Link href="/notifications" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Notifications</Link>
-                      <div className="border-t my-1" />
-                      <Link href="/trips" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">My Trips</Link>
-                      <Link href="/wishlist" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">My Wishlist</Link>
-                      <Link href="/host" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Switch to Hosting</Link>
-                      <div className="border-t my-1" />
-                      <Link href="/host/listings/new" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Airbnb your home</Link>
-                      <Link href="#" className="block px-4 py-3 text-sm hover:bg-gray-50">
-                        <CircleHelp className="inline h-4 w-4 mr-2" />Help Centre
+                      <Link href="/wishlist" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Wishlists</Link>
+                      <Link href="/trips" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Trips</Link>
+                      <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Messages</Link>
+                      <Link href="/users/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Profile</Link>
+                      <div className="border-t my-2" />
+                      <Link href="/notifications" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Notifications</Link>
+                      <Link href="/account-settings" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Account settings</Link>
+                      <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Languages & currency</Link>
+                      <Link href="#" className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Help Centre</Link>
+                      <div className="border-t my-2" />
+                      <Link href="/host/listings/new" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">
+                        Become a host
+                        <span className="block text-[13px] text-gray-500">It&apos;s easy to start hosting</span>
                       </Link>
-                      <div className="border-t my-1" />
-                      <button onClick={logout} className="flex w-full items-center gap-2 px-4 py-3 text-sm hover:bg-gray-50 text-red-600">
-                        <LogOut className="h-4 w-4" />Log out
+                      <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Refer a host</Link>
+                      <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Find a co-host</Link>
+                      <div className="border-t my-2" />
+                      <button onClick={logout} className="flex w-full items-center px-4 py-[10px] text-[15px] hover:bg-gray-50">
+                        Log out
                       </button>
                     </>
                   ) : (

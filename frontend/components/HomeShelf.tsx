@@ -56,7 +56,10 @@ export default function HomeShelf({
   if (listings.length === 0) return null;
 
   function scroll(dir: "left" | "right") {
-    railRef.current?.scrollBy({ left: dir === "left" ? -700 : 700, behavior: "smooth" });
+    if (railRef.current) {
+      const scrollAmount = railRef.current.clientWidth;
+      railRef.current.scrollBy({ left: dir === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+    }
   }
 
   const seeAllImages = listings.slice(0, 4).map((l) => l.cover_image);
@@ -93,7 +96,7 @@ export default function HomeShelf({
       {/* Horizontal scroll rail */}
       <div
         ref={railRef}
-        className="no-scrollbar grid auto-cols-[170px] grid-flow-col gap-3 overflow-x-auto scroll-smooth pb-2"
+        className="no-scrollbar grid snap-x snap-mandatory auto-cols-[100%] sm:auto-cols-[calc((100%-12px)/2)] md:auto-cols-[calc((100%-24px)/3)] lg:auto-cols-[calc((100%-36px)/4)] xl:auto-cols-[calc((100%-48px)/5)] 2xl:auto-cols-[calc((100%-60px)/6)] grid-flow-col gap-3 overflow-x-auto scroll-smooth pb-2"
       >
         {listings.slice(0, 10).map((listing) => (
           <ListingCard

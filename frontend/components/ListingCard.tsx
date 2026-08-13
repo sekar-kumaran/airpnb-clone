@@ -38,7 +38,7 @@ export default function ListingCard({
     : listing.price_per_night;
 
   return (
-    <Link href={href || `/listing/${listing.id}`} className="group block">
+    <Link href={href || `/listing/${listing.id}`} className="group block snap-start">
       {/* Image container */}
       <div
         className={`relative w-full overflow-hidden ${

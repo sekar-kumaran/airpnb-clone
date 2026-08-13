@@ -88,7 +88,7 @@ async function getShelfListings(
     const { results } = await api.searchListings({
       location: section.location,
       property_type: section.property_type,
-      limit: 10,
+      limit: 15,
     });
     return results.length ? results : fallback;
   } catch {
@@ -111,7 +111,7 @@ export default async function HomePageContent({ mode = "all" }: { mode?: HomeMod
 
   return (
     <div className="bg-white">
-      <div className="mx-auto max-w-[1760px] px-6 sm:px-10">
+      <div className="mx-auto max-w-[1760px] px-6 md:px-10 xl:px-20">
         <div className="py-8">
           {sections.map((section) => (
             <HomeShelf
