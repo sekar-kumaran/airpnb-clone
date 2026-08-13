@@ -13,12 +13,6 @@ function formatINR(n: number) {
   }).format(n);
 }
 
-// ── Quick filter pills ────────────────────────────────────────────────────────
-const QUICK_FILTERS = [
-  "Wifi", "Kitchen", "Free parking", "Pool", "Air conditioning",
-  "Washing machine", "2+ bedrooms", "Allows pets", "1+ bathrooms", "Instant Book"
-];
-
 // ── Individual result card ────────────────────────────────────────────────────
 function ResultCard({ listing }: { listing: ListingCard }) {
   const [saved, setSaved] = useState(false);
@@ -32,6 +26,7 @@ function ResultCard({ listing }: { listing: ListingCard }) {
     <div className="group">
       {/* Image */}
       <div className="relative aspect-[20/19] overflow-hidden rounded-xl bg-gray-100">
+        <Link href={`/listing/${listing.id}`} className="absolute inset-0 z-10" />
         {images[imgIndex] ? (
           <Image
             src={images[imgIndex]}
@@ -47,7 +42,7 @@ function ResultCard({ listing }: { listing: ListingCard }) {
         {/* Heart */}
         <button
           onClick={() => setSaved(!saved)}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center"
+          className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center"
         >
           <Heart className={`h-6 w-6 drop-shadow-md ${saved ? "fill-primary stroke-primary" : "fill-black/30 stroke-white"}`} />
         </button>
@@ -66,19 +61,19 @@ function ResultCard({ listing }: { listing: ListingCard }) {
         {/* Image carousel dots */}
         {images.length > 1 && (
           <>
-            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1">
+            <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1">
               {images.map((_, i) => (
-                <button key={i} onClick={() => setImgIndex(i)}
+                <button key={i} onClick={(e) => { e.preventDefault(); setImgIndex(i); }}
                   className={`h-1.5 w-1.5 rounded-full transition ${i === imgIndex ? "bg-white" : "bg-white/50"}`}
                 />
               ))}
             </div>
-            <button onClick={() => setImgIndex(Math.max(0, imgIndex - 1))}
-              className="absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 opacity-0 shadow group-hover:opacity-100 transition">
+            <button onClick={(e) => { e.preventDefault(); setImgIndex(Math.max(0, imgIndex - 1)); }}
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 opacity-0 shadow group-hover:opacity-100 transition">
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <button onClick={() => setImgIndex(Math.min(images.length - 1, imgIndex + 1))}
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 opacity-0 shadow group-hover:opacity-100 transition">
+            <button onClick={(e) => { e.preventDefault(); setImgIndex(Math.min(images.length - 1, imgIndex + 1)); }}
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 opacity-0 shadow group-hover:opacity-100 transition">
               <ChevronRight className="h-4 w-4" />
             </button>
           </>
@@ -207,7 +202,6 @@ interface SearchContentProps {
 
 export default function SearchContent({ listings, total, page, limit, searchParams }: SearchContentProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const place = searchParams.location || "all homes";
 
@@ -216,10 +210,6 @@ export default function SearchContent({ listings, total, page, limit, searchPara
     Object.entries(searchParams).forEach(([k, v]) => { if (v && k !== "page") params.set(k, v); });
     if (nextPage > 1) params.set("page", String(nextPage));
     return `/search${params.toString() ? `?${params.toString()}` : ""}`;
-  }
-
-  function toggleFilter(f: string) {
-    setActiveFilters(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   }
 
   return (
@@ -235,21 +225,6 @@ export default function SearchContent({ listings, total, page, limit, searchPara
             <SlidersHorizontal className="h-4 w-4" />
             Filters
           </button>
-
-          {/* Quick-filter pills */}
-          {QUICK_FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => toggleFilter(f)}
-              className={`shrink-0 rounded-full border px-5 py-2 text-sm transition whitespace-nowrap ${
-                activeFilters.includes(f)
-                  ? "border-gray-900 bg-gray-100 text-gray-900 font-semibold"
-                  : "border-gray-300 hover:border-gray-900 font-medium"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
         </div>
       </div>
 
