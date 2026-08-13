@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CalendarDays, DollarSign, Home, Users } from "lucide-react";
 import { api } from "@/lib/api-client";
@@ -15,6 +16,7 @@ export default function HostDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [listingToDelete, setListingToDelete] = useState<number | null>(null);
   const { showToast } = useToast();
+  const router = useRouter();
 
   const fetchDashboard = useCallback(async () => {
     try {
@@ -33,8 +35,13 @@ export default function HostDashboardPage() {
   }, [showToast]);
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      router.push("/");
+      return;
+    }
     fetchDashboard();
-  }, [fetchDashboard]);
+  }, [fetchDashboard, router]);
 
   const stats = useMemo(() => {
     const confirmed = bookings.filter((booking) => booking.status === "confirmed");

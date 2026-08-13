@@ -1,65 +1,72 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
-import { useToast } from "@/components/ToastProvider";
-import ListingGrid from "@/components/ListingGrid";
-import type { ListingCard } from "@/types";
+import { ListingCard as ListingCardType } from "@/types";
+import ListingCard from "@/components/ListingCard";
+import { useWishlist } from "@/components/WishlistProvider";
 
 export default function WishlistPage() {
-  const [listings, setListings] = useState<ListingCard[]>([]);
+  const router = useRouter();
+  const { wishlist, loading: wishlistLoading } = useWishlist();
+  const [listings, setListings] = useState<ListingCardType[]>([]);
   const [loading, setLoading] = useState(true);
-  const { showToast } = useToast();
 
   useEffect(() => {
-    let active = true;
-    api
-      .getWishlist()
-      .then((data) => {
-        if (active) setListings(data);
-      })
-      .catch((err: any) => showToast(err.message || "Failed to load wishlist", "error"))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [showToast]);
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      router.push("/");
+      return;
+    }
+    loadWishlists();
+  }, [router]);
 
-  if (loading) {
+  async function loadWishlists() {
+    setLoading(true);
+    try {
+      const data = await api.getWishlist();
+      setListings(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Filter listings based on the global wishlist state, so if they unlike it 
+  // on this page, it immediately disappears.
+  const displayListings = listings.filter((l) => wishlist.has(l.id));
+
+  if (loading || wishlistLoading) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <h1 className="text-3xl font-bold mb-8">Wishlist</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((n) => (
-            <div key={n} className="h-64 bg-gray-100 animate-pulse rounded-2xl" />
-          ))}
+      <div className="mx-auto max-w-[1120px] px-6 py-12 lg:px-10">
+        <h1 className="mb-8 text-3xl font-semibold tracking-tight text-gray-900">Wishlists</h1>
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-8">Wishlist</h1>
+    <div className="mx-auto max-w-[1120px] px-6 py-12 lg:px-10 min-h-[60vh]">
+      <h1 className="mb-8 text-3xl font-semibold tracking-tight text-gray-900">Wishlists</h1>
 
-      {listings.length === 0 ? (
-        <div className="text-center py-16 border rounded-2xl bg-gray-50">
-          <h2 className="text-xl font-semibold mb-2">Create your first wishlist</h2>
-          <p className="text-gray-500 mb-6">
-            As you search, tap the heart icon to save your favourite places for later.
+      {displayListings.length === 0 ? (
+        <div className="py-12">
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900">Create your first wishlist</h2>
+          <p className="mb-8 text-gray-600">
+            As you search, tap the heart icon to save your favourite places to stay or things to do to a wishlist.
           </p>
-          <Link
-            href="/search"
-            className="inline-block px-6 py-3 bg-rose-500 text-white font-semibold rounded-xl hover:bg-rose-600 transition"
-          >
-            Start exploring
-          </Link>
         </div>
       ) : (
-        <ListingGrid listings={listings} />
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:gap-x-8">
+          {displayListings.map((listing) => (
+            <ListingCard key={listing.id} listing={listing} />
+          ))}
+        </div>
       )}
     </div>
   );

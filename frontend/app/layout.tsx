@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ToastProvider } from "@/components/ToastProvider";
+import { WishlistProvider } from "@/components/WishlistProvider";
 
 export const metadata: Metadata = {
   title: "Airbnb Clone — Holiday rentals, cabins, beach houses & more",
@@ -16,9 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="flex min-h-screen flex-col bg-white text-gray-900 antialiased">
         <ToastProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <WishlistProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </WishlistProvider>
         </ToastProvider>
       </body>
     </html>

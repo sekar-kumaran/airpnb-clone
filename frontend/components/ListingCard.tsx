@@ -3,10 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star } from "lucide-react";
-import { useState } from "react";
 import type { ListingCard as ListingCardType } from "@/types";
-import { api } from "@/lib/api-client";
-import { useToast } from "@/components/ToastProvider";
+import { useWishlist } from "@/components/WishlistProvider";
 
 function formatINR(amount: number) {
   return new Intl.NumberFormat("en-IN", {
@@ -20,14 +18,15 @@ export default function ListingCard({
   listing,
   variant = "grid",
   cardType = "home",
+  href,
 }: {
   listing: ListingCardType;
   variant?: "grid" | "shelf" | "result";
   cardType?: "home" | "experience" | "service";
+  href?: string;
 }) {
-  const [saved, setSaved] = useState(false);
-  const [pending, setPending] = useState(false);
-  const { showToast } = useToast();
+  const { wishlist, toggleWishlist } = useWishlist();
+  const isSaved = wishlist.has(listing.id);
   const isShelf = variant === "shelf";
   const isExperience = cardType === "experience";
   const isService = cardType === "service";
@@ -38,27 +37,8 @@ export default function ListingCard({
     ? Math.round(listing.price_per_night * 2)
     : listing.price_per_night;
 
-  async function toggleWishlist(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    setPending(true);
-    try {
-      if (saved) {
-        await api.removeFromWishlist(listing.id);
-      } else {
-        await api.addToWishlist(listing.id);
-      }
-      setSaved(!saved);
-      showToast(saved ? "Removed from wishlist" : "Saved to wishlist", "success");
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Unable to update wishlist", "error");
-    } finally {
-      setPending(false);
-    }
-  }
-
   return (
-    <Link href={`/listing/${listing.id}`} className="group block">
+    <Link href={href || `/listing/${listing.id}`} className="group block">
       {/* Image container */}
       <div
         className={`relative w-full overflow-hidden ${
@@ -78,16 +58,18 @@ export default function ListingCard({
         )}
 
         {/* Heart button */}
-        <button
-          onClick={toggleWishlist}
-          disabled={pending}
-          aria-label="Save to wishlist"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center"
+        <button 
+          className="absolute right-3 top-3 z-10 rounded-full p-1 transition hover:scale-110 active:scale-95"
+          onClick={(e) => {
+            e.preventDefault();
+            toggleWishlist(listing.id);
+          }}
         >
-          <Heart
-            className={`h-6 w-6 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)] ${
-              saved ? "fill-primary stroke-primary" : "fill-black/35 stroke-white"
-            }`}
+          <Heart 
+            className={`h-[22px] w-[22px] transition ${
+              isSaved ? "fill-[#FF385C] text-[#FF385C]" : "fill-black/30 text-white"
+            }`} 
+            strokeWidth={1.5} 
           />
         </button>
 
