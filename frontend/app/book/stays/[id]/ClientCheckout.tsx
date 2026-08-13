@@ -164,8 +164,8 @@ export default function ClientCheckout({ listing, searchParams }: ClientCheckout
               {/* Header */}
               <div className="mb-6 flex gap-4 border-b border-gray-200 pb-6">
                 <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                  {listing.cover_image && (
-                    <Image src={listing.cover_image} alt={listing.title} fill className="object-cover" sizes="96px" />
+                  {listing.images && listing.images.length > 0 && (
+                    <Image src={listing.images[0]} alt={listing.title} fill className="object-cover" sizes="96px" />
                   )}
                 </div>
                 <div className="flex flex-col justify-between">
