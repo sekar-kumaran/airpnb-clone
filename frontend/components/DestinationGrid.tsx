@@ -31,7 +31,7 @@ const DESTINATIONS = [
     city: "Rishikesh",
     state: "Uttarakhand",
     time: "6 hours away",
-    image: "https://images.unsplash.com/photo-1591017403310-4e65059c7498?w=400&q=80",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80",
   },
   {
     city: "Ooty",
