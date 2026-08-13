@@ -181,14 +181,14 @@ export default function Header() {
                 <button
                   key={link.id}
                   onClick={() => setActiveMode(link.id as any)}
-                  className={`flex items-center gap-2 pb-2 transition ${
+                  className={`flex items-center gap-3 pb-3 transition ${
                     activeMode === link.id
                       ? "border-b-2 border-gray-900 text-gray-900"
                       : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"
                   }`}
                 >
-                  <Image src={link.src} alt={link.label} width={24} height={24} className={`${activeMode === link.id ? "opacity-100 grayscale-0" : "opacity-60 grayscale"}`} unoptimized />
-                  <span className="text-sm font-semibold">{link.label}</span>
+                  <Image src={link.src} alt={link.label} width={26} height={26} className={`${activeMode === link.id ? "opacity-100" : "opacity-70"}`} unoptimized />
+                  <span className="text-[16px] font-semibold">{link.label}</span>
                 </button>
               ))}
             </nav>
@@ -297,18 +297,18 @@ export default function Header() {
 
         {/* ── Search bar (home pages only) ── */}
         {!compact && (
-          <div ref={searchWrapRef} className="relative mx-auto mt-3 max-w-[860px]">
-            <div className="flex h-[62px] items-center rounded-full border border-gray-300 bg-white shadow-md hover:shadow-lg transition-shadow">
+          <div ref={searchWrapRef} className="relative mx-auto mt-7 mb-2 max-w-[860px]">
+            <div className="flex h-[66px] items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition-shadow">
               {/* Where */}
               <button
                 type="button"
                 onClick={() => openField("where")}
-                className={`h-[62px] flex-1 rounded-full px-6 text-left transition ${
+                className={`h-[66px] flex-1 rounded-full px-6 text-left transition ${
                   activeField === "where" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
                 }`}
               >
-                <span className="block text-xs font-bold text-gray-900">Where</span>
-                <span className="text-sm text-gray-500">{location || "Search destinations"}</span>
+                <span className="block text-[13px] font-bold text-gray-900 tracking-wide">Where</span>
+                <span className="text-[15px] text-gray-500">{location || "Search destinations"}</span>
               </button>
 
               <span className="h-8 w-px bg-gray-200" />
@@ -317,12 +317,12 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => openField("when")}
-                className={`flex-1 rounded-full px-6 py-3.5 text-left transition hover:bg-gray-200 ${
+                className={`h-[66px] flex-1 rounded-full px-6 text-left transition hover:bg-gray-200 ${
                   activeField === "when" && searchOpen ? "bg-white shadow-md" : ""
                 }`}
               >
-                <span className="block text-xs font-bold text-gray-900">When</span>
-                <span className="text-sm text-gray-500 truncate">{selectedDate ? selectedDate : "Add dates"}</span>
+                <span className="block text-[13px] font-bold text-gray-900 tracking-wide">When</span>
+                <span className="text-[15px] text-gray-500 truncate">{selectedDate ? selectedDate : "Add dates"}</span>
               </button>
 
               <span className="h-8 w-px bg-gray-200" />
@@ -331,13 +331,13 @@ export default function Header() {
               {/* Who */}
               <div
                 onClick={() => openField("who")}
-                className={`cursor-pointer h-[62px] flex-[1.4] flex items-center justify-between rounded-full pl-6 pr-3 transition ${
+                className={`cursor-pointer h-[66px] flex-[1.4] flex items-center justify-between rounded-full pl-6 pr-3 transition ${
                   activeField === "who" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
                 }`}
               >
                 <div className="text-left">
-                  <span className="block text-xs font-bold text-gray-900">Who</span>
-                  <span className="text-sm text-gray-500">{guestsLabel}</span>
+                  <span className="block text-[13px] font-bold text-gray-900 tracking-wide">Who</span>
+                  <span className="text-[15px] text-gray-500">{guestsLabel}</span>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); submitSearch(); }}
