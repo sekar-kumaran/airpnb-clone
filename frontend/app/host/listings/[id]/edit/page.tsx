@@ -1,130 +1,63 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { useToast } from "@/components/ToastProvider";
 
-interface AmenityOption {
-  id: number;
-  name: string;
-  icon: string | null;
-}
-
-interface CategoryOption {
-  id: number;
-  name: string;
-  icon: string | null;
-}
-
-export default function EditListingPage() {
+export default function EditListingPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const params = useParams();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [amenities, setAmenities] = useState<AmenityOption[]>([]);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
-
-  // Form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [propertyType, setPropertyType] = useState("Apartment");
-  const [pricePerNight, setPricePerNight] = useState("");
-  const [cleaningFee, setCleaningFee] = useState("");
-  const [serviceFeePct, setServiceFeePct] = useState("12");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
-  const [maxGuests, setMaxGuests] = useState("2");
-  const [bedrooms, setBedrooms] = useState("1");
-  const [beds, setBeds] = useState("1");
-  const [bathrooms, setBathrooms] = useState("1");
-  const [imageUrls, setImageUrls] = useState<string[]>([""]);
-  const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    property_type: "House",
+    price_per_night: 100,
+    city: "",
+    country: "",
+    location: "",
+    cover_image: "",
+    max_guests: 2,
+    bedrooms: 1,
+    beds: 1,
+    bathrooms: 1,
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function loadData() {
       try {
-        const [amenitiesRes, categoriesRes, listingRes] = await Promise.all([
-          api.getAmenities(),
-          api.getCategories(),
-          api.getListing(Number(params.id)),
-        ]);
-        setAmenities(amenitiesRes);
-        setCategories(categoriesRes);
-
-        // Populate form with listing data
-        setTitle(listingRes.title);
-        setDescription(listingRes.description);
-        setPropertyType(listingRes.property_type);
-        setPricePerNight(String(listingRes.price_per_night));
-        setCleaningFee(String(listingRes.cleaning_fee));
-        setServiceFeePct(String(Math.round(listingRes.service_fee_pct * 100)));
-        setCity(listingRes.city);
-        setCountry(listingRes.country);
-        setMaxGuests(String(listingRes.max_guests));
-        setBedrooms(String(listingRes.bedrooms));
-        setBeds(String(listingRes.beds));
-        setBathrooms(String(listingRes.bathrooms));
-        setImageUrls(listingRes.images.length > 0 ? listingRes.images.map((i) => i.url) : [""]);
-        setSelectedAmenities(listingRes.amenities.map((a) => a.id));
-        setSelectedCategory(listingRes.categories.length > 0 ? listingRes.categories[0].id : null);
+        const data = await api.getListing(Number(params.id));
+        setFormData({
+          title: data.title,
+          description: data.description,
+          property_type: data.property_type,
+          price_per_night: data.price_per_night,
+          city: data.city,
+          country: data.country,
+          location: data.location || "",
+          cover_image: data.cover_image || "",
+          max_guests: data.max_guests,
+          bedrooms: data.bedrooms,
+          beds: data.beds,
+          bathrooms: data.bathrooms,
+        });
       } catch (err: any) {
-        showToast(err.message || "Failed to load listing", "error");
+        showToast("Failed to load listing", "error");
         router.push("/host");
       } finally {
         setLoading(false);
       }
-    };
-    fetchData();
+    }
+    loadData();
   }, [params.id, router, showToast]);
 
-  const handleAddImage = () => setImageUrls([...imageUrls, ""]);
-  const handleRemoveImage = (idx: number) => setImageUrls(imageUrls.filter((_, i) => i !== idx));
-
-  const toggleAmenity = (id: number) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
-  };
-
-  const validate = (): string | null => {
-    if (!title.trim()) return "Title is required";
-    if (!description.trim()) return "Description is required";
-    if (!pricePerNight || Number(pricePerNight) <= 0) return "Price per night must be positive";
-    if (!city.trim()) return "City is required";
-    if (!country.trim()) return "Country is required";
-    return null;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const error = validate();
-    if (error) {
-      showToast(error, "error");
-      return;
-    }
-
     setSaving(true);
     try {
-      await api.updateListing(Number(params.id), {
-        title: title.trim(),
-        description: description.trim(),
-        property_type: propertyType,
-        price_per_night: Number(pricePerNight),
-        cleaning_fee: Number(cleaningFee) || 0,
-        service_fee_pct: (Number(serviceFeePct) || 12) / 100,
-        city: city.trim(),
-        country: country.trim(),
-        max_guests: Number(maxGuests),
-        bedrooms: Number(bedrooms),
-        beds: Number(beds),
-        bathrooms: Number(bathrooms),
-        image_urls: imageUrls.filter((u) => u.trim()),
-        amenity_ids: selectedAmenities,
-        category_ids: selectedCategory ? [selectedCategory] : [],
-      });
+      await api.updateListing(Number(params.id), formData as any);
       showToast("Listing updated successfully!", "success");
       router.push("/host");
     } catch (err: any) {
@@ -132,223 +65,86 @@ export default function EditListingPage() {
     } finally {
       setSaving(false);
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-12">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
-        </div>
+      <div className="mx-auto max-w-3xl px-6 py-12 lg:px-10 min-h-[60vh] flex justify-center items-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-8">Edit Listing</h1>
-
+    <div className="mx-auto max-w-3xl px-6 py-12 lg:px-10 min-h-[60vh]">
+      <h1 className="mb-8 text-3xl font-semibold tracking-tight text-gray-900">Edit listing</h1>
+      
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Cozy beachfront villa"
-            className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-          />
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-            placeholder="Describe your place..."
-            className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 resize-none"
-          />
-        </div>
-
-        {/* Property Type */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">Property type</label>
-          <select
-            value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
-            className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-          >
-            {["Apartment", "House", "Villa", "Cabin", "Cottage", "Loft", "Condo"].map((t) => (
-              <option key={t}>{t}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Pricing */}
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-semibold mb-1">Price / night ($)</label>
-            <input
-              type="number"
-              min="1"
-              value={pricePerNight}
-              onChange={(e) => setPricePerNight(e.target.value)}
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-semibold">Title</label>
+            <input required type="text" className="w-full rounded-xl border p-3" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Cleaning fee ($)</label>
-            <input
-              type="number"
-              min="0"
-              value={cleaningFee}
-              onChange={(e) => setCleaningFee(e.target.value)}
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-            />
+          
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-semibold">Description</label>
+            <textarea required className="w-full rounded-xl border p-3 min-h-[100px]" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Service fee %</label>
-            <input
-              type="number"
-              min="0"
-              max="50"
-              value={serviceFeePct}
-              onChange={(e) => setServiceFeePct(e.target.value)}
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-            />
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">City</label>
+            <input required type="text" className="w-full rounded-xl border p-3" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
           </div>
-        </div>
 
-        {/* Location */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold mb-1">City</label>
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="San Francisco"
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-            />
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Country</label>
+            <input required type="text" className="w-full rounded-xl border p-3" value={formData.country} onChange={e => setFormData({...formData, country: e.target.value})} />
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Country</label>
-            <input
-              type="text"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              placeholder="United States"
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-            />
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-semibold">Location / Address</label>
+            <input required type="text" className="w-full rounded-xl border p-3" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} />
           </div>
-        </div>
 
-        {/* Capacity */}
-        <div className="grid grid-cols-4 gap-4">
-          {[
-            { label: "Guests", value: maxGuests, setter: setMaxGuests },
-            { label: "Bedrooms", value: bedrooms, setter: setBedrooms },
-            { label: "Beds", value: beds, setter: setBeds },
-            { label: "Bathrooms", value: bathrooms, setter: setBathrooms },
-          ].map(({ label, value, setter }) => (
-            <div key={label}>
-              <label className="block text-sm font-semibold mb-1">{label}</label>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={value}
-                onChange={(e) => setter(e.target.value)}
-                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Images */}
-        <div>
-          <label className="block text-sm font-semibold mb-2">Image URLs</label>
-          {imageUrls.map((url, idx) => (
-            <div key={idx} className="flex gap-2 mb-2">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => {
-                  const updated = [...imageUrls];
-                  updated[idx] = e.target.value;
-                  setImageUrls(updated);
-                }}
-                placeholder="https://..."
-                className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-              {imageUrls.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(idx)}
-                  className="px-3 text-red-500 hover:bg-red-50 rounded-lg text-sm"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddImage}
-            className="text-sm text-rose-500 font-semibold hover:underline"
-          >
-            + Add another image
-          </button>
-        </div>
-
-        {/* Amenities */}
-        {amenities.length > 0 && (
-          <div>
-            <label className="block text-sm font-semibold mb-2">Amenities</label>
-            <div className="flex flex-wrap gap-2">
-              {amenities.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => toggleAmenity(a.id)}
-                  className={"px-3 py-1.5 rounded-full text-sm border transition " + (selectedAmenities.includes(a.id) ? "bg-black text-white border-black" : "bg-white text-gray-700 border-gray-300 hover:border-black")}
-                >
-                  {a.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Category */}
-        {categories.length > 0 && (
-          <div>
-            <label className="block text-sm font-semibold mb-1">Category</label>
-            <select
-              value={selectedCategory ?? ""}
-              onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
-            >
-              <option value="">Select a category (optional)</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Property Type</label>
+            <select className="w-full rounded-xl border p-3" value={formData.property_type} onChange={e => setFormData({...formData, property_type: e.target.value})}>
+              <option>House</option>
+              <option>Apartment</option>
+              <option>Cabin</option>
+              <option>Villa</option>
             </select>
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full py-3 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition disabled:opacity-50 text-base"
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Price per night (USD)</label>
+            <input required type="number" min="1" className="w-full rounded-xl border p-3" value={formData.price_per_night} onChange={e => setFormData({...formData, price_per_night: Number(e.target.value)})} />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Max Guests</label>
+            <input required type="number" min="1" className="w-full rounded-xl border p-3" value={formData.max_guests} onChange={e => setFormData({...formData, max_guests: Number(e.target.value)})} />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Bedrooms</label>
+            <input required type="number" min="1" className="w-full rounded-xl border p-3" value={formData.bedrooms} onChange={e => setFormData({...formData, bedrooms: Number(e.target.value)})} />
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-semibold">Cover Image URL</label>
+            <input type="url" className="w-full rounded-xl border p-3" value={formData.cover_image} onChange={e => setFormData({...formData, cover_image: e.target.value})} />
+          </div>
+        </div>
+
+        <div className="pt-6 border-t flex justify-end gap-4">
+          <button type="button" onClick={() => router.push("/host")} className="px-6 py-3 font-semibold hover:bg-gray-50 rounded-xl transition">
+            Cancel
+          </button>
+          <button type="submit" disabled={saving} className="rounded-xl bg-[#FF385C] px-8 py-3 font-semibold text-white transition hover:bg-[#E31C5F] disabled:opacity-70">
+            {saving ? "Saving..." : "Save changes"}
+          </button>
+        </div>
       </form>
     </div>
   );

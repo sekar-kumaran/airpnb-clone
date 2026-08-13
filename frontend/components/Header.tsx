@@ -259,11 +259,15 @@ export default function Header() {
                         <p className="font-semibold text-sm">{user.name}</p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                       </div>
+                      <Link href="/users/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Profile</Link>
+                      <Link href="/account-settings" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Account</Link>
+                      <Link href="/notifications" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Notifications</Link>
+                      <div className="border-t my-1" />
                       <Link href="/trips" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">My Trips</Link>
                       <Link href="/wishlist" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">My Wishlist</Link>
                       <Link href="/host" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Switch to Hosting</Link>
                       <div className="border-t my-1" />
-                      <Link href="/host" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Airbnb your home</Link>
+                      <Link href="/host/listings/new" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Airbnb your home</Link>
                       <Link href="#" className="block px-4 py-3 text-sm hover:bg-gray-50">
                         <CircleHelp className="inline h-4 w-4 mr-2" />Help Centre
                       </Link>
