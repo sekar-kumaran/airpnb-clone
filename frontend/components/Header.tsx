@@ -85,8 +85,10 @@ function Logo() {
 
 export default function Header() {
   const pathname = usePathname();
-  const compact = pathname.startsWith("/search") || pathname.startsWith("/listing");
   const router = useRouter();
+
+  const [isExpandedOverride, setIsExpandedOverride] = useState(false);
+  const compact = (pathname.startsWith("/search") || pathname.startsWith("/listing")) && !isExpandedOverride;
 
   // UI state
   const [menuOpen, setMenuOpen] = useState(false);
@@ -122,7 +124,10 @@ export default function Header() {
     const handle = (e: MouseEvent) => {
       const t = e.target as Node;
       if (menuRef.current && !menuRef.current.contains(t)) setMenuOpen(false);
-      if (searchWrapRef.current && !searchWrapRef.current.contains(t)) setSearchOpen(false);
+      if (searchWrapRef.current && !searchWrapRef.current.contains(t)) {
+        setSearchOpen(false);
+        setIsExpandedOverride(false);
+      }
     };
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
@@ -135,6 +140,7 @@ export default function Header() {
     const guests = adults + children;
     if (guests > 0) params.set("guests", String(guests));
     setSearchOpen(false);
+    setIsExpandedOverride(false);
     router.push(`/search${params.toString() ? `?${params.toString()}` : ""}`);
   }
 
@@ -168,15 +174,18 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
+    <header className="sticky top-0 z-40 bg-white">
       <div className="mx-auto max-w-[1760px] px-6 py-4 md:px-10 xl:px-20">
         {/* ── Top row ── */}
-        <div className="flex items-center justify-between gap-4">
-          <Logo />
+        <div className="flex items-center justify-between">
+          <div className="flex flex-1 items-center justify-start">
+            <Logo />
+          </div>
 
           {/* Centre: nav tabs (home) or compact search pill (search/listing) */}
-          {!compact ? (
-            <nav className="hidden items-center gap-6 lg:flex">
+          <div className="flex flex-[2] items-center justify-center">
+            {!compact ? (
+              <nav className="hidden items-center gap-6 lg:flex">
               {navLinks.map((link) => (
                 <button
                   key={link.id}
@@ -195,7 +204,10 @@ export default function Header() {
           ) : (
             <button
               type="button"
-              onClick={() => openField("where")}
+              onClick={() => {
+                setIsExpandedOverride(true);
+                openField("where");
+              }}
               className="hidden h-12 w-auto items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition lg:flex"
             >
               <span className="flex items-center gap-2 pl-6 pr-4 text-[14px] font-semibold">
@@ -219,9 +231,10 @@ export default function Header() {
               </span>
             </button>
           )}
+          </div>
 
           {/* Right: host link + lang + menu */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center justify-end gap-2">
             <Link
               href="/host"
               className="hidden rounded-full px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 md:block"
@@ -300,41 +313,44 @@ export default function Header() {
         {/* ── Search bar (home pages only) ── */}
         {!compact && (
           <div ref={searchWrapRef} className="relative mx-auto mt-7 mb-2 max-w-[860px]">
-            <div className="flex h-[66px] items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition-shadow">
+            <div className="flex h-[66px] items-center rounded-full border border-gray-200 bg-gray-100 transition-shadow">
               {/* Where */}
               <button
                 type="button"
                 onClick={() => openField("where")}
                 className={`h-[66px] flex-1 rounded-full px-6 text-left transition ${
-                  activeField === "where" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
+                  activeField === "where" && searchOpen ? "bg-white shadow-xl hover:bg-white" : "hover:bg-gray-200"
                 }`}
               >
                 <span className="block text-[13px] font-bold text-gray-900 tracking-wide">Where</span>
                 <span className="text-[15px] text-gray-500">{location || "Search destinations"}</span>
               </button>
 
-              <span className="h-8 w-px bg-gray-200" />
+              {!(activeField === "where" && searchOpen) && !(activeField === "when" && searchOpen) && (
+                <span className="h-8 w-px bg-gray-300" />
+              )}
 
               {/* When */}
               <button
                 type="button"
                 onClick={() => openField("when")}
-                className={`h-[66px] flex-1 rounded-full px-6 text-left transition hover:bg-gray-200 ${
-                  activeField === "when" && searchOpen ? "bg-white shadow-md" : ""
+                className={`h-[66px] flex-1 rounded-full px-6 text-left transition ${
+                  activeField === "when" && searchOpen ? "bg-white shadow-xl hover:bg-white" : "hover:bg-gray-200"
                 }`}
               >
                 <span className="block text-[13px] font-bold text-gray-900 tracking-wide">When</span>
                 <span className="text-[15px] text-gray-500 truncate">{selectedDate ? selectedDate : "Add dates"}</span>
               </button>
 
-              <span className="h-8 w-px bg-gray-200" />
+              {!(activeField === "when" && searchOpen) && !(activeField === "who" && searchOpen) && (
+                <span className="h-8 w-px bg-gray-300" />
+              )}
 
-              {/* Who */}
               {/* Who */}
               <div
                 onClick={() => openField("who")}
                 className={`cursor-pointer h-[66px] flex-[1.4] flex items-center justify-between rounded-full pl-6 pr-3 transition ${
-                  activeField === "who" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
+                  activeField === "who" && searchOpen ? "bg-white shadow-xl hover:bg-white" : "hover:bg-gray-200"
                 }`}
               >
                 <div className="text-left">
@@ -343,7 +359,7 @@ export default function Header() {
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); submitSearch(); }}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark transition-colors"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark transition-colors"
                 >
                   <Search className="h-4 w-4" />
                 </button>
