@@ -145,7 +145,7 @@ export default function ClientCheckout({ listing, searchParams }: ClientCheckout
             <section className={`rounded-2xl border border-gray-200 p-6 ${!user ? "opacity-50 grayscale pointer-events-none" : "shadow-sm"}`}>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">3. Review your reservation</h2>
               <p className="mb-6 text-sm text-gray-600">
-                By selecting the button below, I agree to the House Rules, Ground Rules for Guests, Airbnb's Rebooking and Refund Policy, and that Airbnb can charge my payment method if I'm responsible for damage.
+                By selecting the button below, I agree to the House Rules, Ground Rules for Guests, Airbnb&apos;s Rebooking and Refund Policy, and that Airbnb can charge my payment method if I&apos;m responsible for damage.
               </p>
               <button
                 onClick={handleConfirm}
@@ -165,7 +165,7 @@ export default function ClientCheckout({ listing, searchParams }: ClientCheckout
               <div className="mb-6 flex gap-4 border-b border-gray-200 pb-6">
                 <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gray-100">
                   {listing.images && listing.images.length > 0 && (
-                    <Image src={listing.images[0]} alt={listing.title} fill className="object-cover" sizes="96px" />
+                    <Image src={typeof listing.images[0] === 'string' ? listing.images[0] : (listing.images[0] as any).url} alt={listing.title} fill className="object-cover" sizes="96px" />
                   )}
                 </div>
                 <div className="flex flex-col justify-between">

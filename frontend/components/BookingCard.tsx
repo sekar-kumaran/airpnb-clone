@@ -219,7 +219,7 @@ export default function BookingCard({ listing }: BookingCardProps) {
                 </div>
               </div>
             ))}
-            <p className="mt-2 text-xs text-gray-500">This place has a maximum of {listing.max_guests} guests, not including infants. Pets aren't allowed.</p>
+            <p className="mt-2 text-xs text-gray-500">This place has a maximum of {listing.max_guests} guests, not including infants. Pets aren&apos;t allowed.</p>
             <button onClick={() => setGuestsOpen(false)} className="mt-3 text-sm font-semibold underline">Close</button>
           </div>
         )}

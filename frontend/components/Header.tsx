@@ -71,10 +71,10 @@ function buildMonths() {
 function Logo() {
   return (
     <Link href="/" className="flex items-center gap-1 text-primary">
-      <svg viewBox="0 0 32 32" className="h-8 w-8 fill-current" aria-hidden>
+      <svg viewBox="0 0 32 32" className="h-10 w-10 fill-current" aria-hidden>
         <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.910 3.405 0 3.424-2.783 6.124-6.207 6.124-2.212 0-4.524-.945-5.253-2.842l-.185.018C16.944 29.055 14.632 30 12.42 30 8.995 30 6.213 27.3 6.213 23.876c0-.933.242-1.814.91-3.405l.145-.353c.986-2.296 5.146-11.006 7.1-14.836l.533-1.025C16.1 1.963 17.555 1 19.563 1H16zm0 2c-1.566 0-2.648.81-3.706 2.817l-.534 1.025C9.807 10.671 5.647 19.38 4.66 21.677l-.144.353c-.586 1.397-.8 2.129-.8 2.846 0 2.42 1.96 4.124 4.207 4.124 1.717 0 3.705-.832 4.33-2.409l.083-.196c.418-1.04 1.35-1.73 2.564-1.73 1.214 0 2.146.69 2.564 1.73l.083.196c.625 1.577 2.613 2.41 4.33 2.41 2.247 0 4.207-1.705 4.207-4.125 0-.717-.214-1.449-.8-2.846l-.144-.353c-.987-2.296-5.147-11.006-7.1-14.836l-.534-1.025C18.648 3.81 17.566 3 16 3z" />
       </svg>
-      <span className="text-[20px] font-bold tracking-tight text-primary hidden sm:inline">airbnb</span>
+      <span className="text-[24px] font-bold tracking-tight text-primary hidden sm:inline">airbnb</span>
     </Link>
   );
 }
@@ -88,7 +88,16 @@ export default function Header() {
   const router = useRouter();
 
   const [isExpandedOverride, setIsExpandedOverride] = useState(false);
-  const compact = (pathname.startsWith("/search") || pathname.startsWith("/listing")) && !isExpandedOverride;
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 0);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isSearchOrListing = pathname.startsWith("/search") || pathname.startsWith("/listing");
+  const compact = (isSearchOrListing || isScrolled) && !isExpandedOverride;
 
   // UI state
   const [menuOpen, setMenuOpen] = useState(false);
@@ -174,7 +183,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white">
+    <header className="sticky top-0 z-40 bg-gradient-to-b from-gray-100 via-white to-white transition-all border-b-[2px] border-gray-200">
       <div className="mx-auto max-w-[1760px] px-6 py-4 md:px-10 xl:px-20">
         {/* ── Top row ── */}
         <div className="flex items-center justify-between">
@@ -196,8 +205,8 @@ export default function Header() {
                       : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"
                   }`}
                 >
-                  <Image src={link.src} alt={link.label} width={26} height={26} className={`${activeMode === link.id ? "opacity-100" : "opacity-70"}`} unoptimized />
-                  <span className="text-[16px] font-semibold">{link.label}</span>
+                  <Image src={link.src} alt={link.label} width={30} height={30} className={`${activeMode === link.id ? "opacity-100" : "opacity-70"}`} unoptimized />
+                  <span className="text-[18px] font-semibold">{link.label}</span>
                 </button>
               ))}
             </nav>
@@ -250,20 +259,28 @@ export default function Header() {
 
             {/* Hamburger + user menu pill */}
             <div className="relative flex items-center gap-2" ref={menuRef}>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-2 rounded-full border border-gray-300 bg-white p-2 pl-3 hover:shadow-md transition-shadow"
-                aria-label="Open menu"
-              >
-                <Menu className="h-4 w-4 text-gray-800" />
-                {user ? (
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-[10px] font-bold text-white">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                ) : (
-                  <UserCircle className="h-7 w-7 text-gray-500" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex h-[46px] w-[46px] items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-5 w-5 text-gray-800" />
+                </button>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex h-[46px] w-[46px] items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
+                  aria-label="User profile"
+                >
+                  {user ? (
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-[12px] font-bold text-white">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  ) : (
+                    <UserCircle className="h-8 w-8 text-gray-500" />
+                  )}
+                </button>
+              </div>
 
               {menuOpen && (
                 <div className="absolute right-0 z-50 mt-2 w-64 rounded-2xl bg-white py-2 shadow-2xl ring-1 ring-black/5">
@@ -297,7 +314,7 @@ export default function Header() {
                       <div className="border-t my-1" />
                       <Link href="/host" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">
                         <span className="block font-semibold">Airbnb your home</span>
-                        <span className="text-xs text-gray-500">It's easy to start hosting</span>
+                        <span className="text-xs text-gray-500">It&apos;s easy to start hosting</span>
                       </Link>
                       <Link href="#" className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-50">
                         <CircleHelp className="h-4 w-4" />Help Centre
@@ -312,7 +329,7 @@ export default function Header() {
 
         {/* ── Search bar (home pages only) ── */}
         {!compact && (
-          <div ref={searchWrapRef} className="relative mx-auto mt-7 mb-2 max-w-[860px]">
+          <div ref={searchWrapRef} className="relative mx-auto mt-7 mb-2 max-w-[700px]">
             <div className="flex h-[66px] items-center rounded-full border border-gray-200 bg-gray-100 transition-shadow">
               {/* Where */}
               <button
