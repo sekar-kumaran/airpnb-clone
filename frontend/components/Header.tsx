@@ -4,20 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Building2,
-  CircleHelp,
-  ConciergeBell,
   Globe,
   Home,
-  Landmark,
-  LogOut,
-  Menu,
-  Minus,
-  Navigation,
+  Map,
+  Briefcase,
   Search,
-  Star,
+  Menu,
   UserCircle,
-  X,
+  Building2,
+  CalendarDays,
+  CircleHelp,
+  LogOut
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import AuthModal from "@/components/AuthModal";
@@ -27,7 +24,7 @@ import AuthModal from "@/components/AuthModal";
 // ──────────────────────────────────────────────
 
 const DESTINATIONS = [
-  { city: "Nearby", sub: "Find what's around you", icon: Navigation },
+  { city: "Nearby", sub: "Find what's around you", icon: Home },
   { city: "Lucknow, Uttar Pradesh", sub: "For its stunning architecture", icon: Building2 },
   { city: "Varanasi, Uttar Pradesh", sub: "Popular with travellers near you", icon: Building2 },
   { city: "Noida, Uttar Pradesh", sub: "Popular with travellers near you", icon: Building2 },
@@ -36,12 +33,12 @@ const DESTINATIONS = [
   { city: "North Goa, Goa", sub: "Popular beach destination", icon: Building2 },
 ];
 
-const navLinks = [
-  { label: "All", emoji: "🌍", id: "all" },
-  { label: "Homes", emoji: "🏡", id: "homes" },
-  { label: "Experiences", emoji: "🎈", id: "experiences" },
-  { label: "Services", emoji: "🛎️", id: "services" },
-];
+  const navLinks = [
+    { label: "All", icon: Globe, id: "all" },
+    { label: "Homes", icon: Home, id: "homes" },
+    { label: "Experiences", icon: Map, id: "experiences" },
+    { label: "Services", icon: Briefcase, id: "services" },
+  ];
 
 // Build two consecutive months from today
 function buildMonths() {
@@ -94,6 +91,7 @@ export default function Header() {
   const [activeField, setActiveField] = useState<"where" | "when" | "who">("where");
   const [activeMode, setActiveMode] = useState<"all" | "homes" | "experiences" | "services">("all");
   const [location, setLocation] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
@@ -159,9 +157,16 @@ export default function Header() {
       ? `${adults + children} guest${adults + children === 1 ? "" : "s"}`
       : "Add guests";
 
+  const guestCounters = [
+    { label: "Adults", sub: "Ages 13 or above", value: adults, setter: setAdults, min: 0 },
+    { label: "Children", sub: "Ages 2–12", value: children, setter: setChildren, min: 0 },
+    { label: "Infants", sub: "Under 2", value: infants, setter: setInfants, min: 0 },
+    { label: "Pets", sub: "Bringing a service animal?", value: pets, setter: setPets, min: 0 },
+  ];
+
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-[1760px] px-6 py-5 md:px-10 xl:px-20">
+      <div className="mx-auto max-w-[1760px] px-6 py-4 md:px-10 xl:px-20">
         {/* ── Top row ── */}
         <div className="flex items-center justify-between gap-4">
           <Logo />
@@ -173,13 +178,13 @@ export default function Header() {
                 <button
                   key={link.id}
                   onClick={() => setActiveMode(link.id as any)}
-                  className={`flex flex-col items-center gap-1.5 pb-2 transition ${
+                  className={`flex flex-col items-center gap-2 pb-2 transition ${
                     activeMode === link.id
                       ? "border-b-2 border-gray-900 text-gray-900"
                       : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"
                   }`}
                 >
-                  <span className="text-2xl leading-none">{link.emoji}</span>
+                  <link.icon className={`h-6 w-6 ${activeMode === link.id ? "text-gray-900" : "text-gray-500"}`} />
                   <span className="text-sm font-semibold">{link.label}</span>
                 </button>
               ))}
@@ -194,7 +199,7 @@ export default function Header() {
                 <span className="truncate">{location ? `Homes in ${location}` : "Anywhere"}</span>
               </span>
               <span className="h-6 w-px bg-gray-200" />
-              <span className="px-4 text-sm font-semibold">Any week</span>
+              <span className="px-4 text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis">{selectedDate ? selectedDate : "Any week"}</span>
               <span className="h-6 w-px bg-gray-200" />
               <span className="px-4 text-sm font-semibold text-gray-500">{guestsLabel}</span>
               <span className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
@@ -218,27 +223,20 @@ export default function Header() {
               <Globe className="h-[18px] w-[18px]" />
             </button>
 
-            {/* Hamburger + user menu separate circles */}
-            <div className="relative flex items-center gap-2" ref={menuRef}>
+            {/* Hamburger + user menu pill */}
+            <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:shadow-md transition-shadow"
+                className="flex h-[42px] items-center gap-3 rounded-full border border-gray-300 pl-3 pr-1 shadow-sm hover:shadow-md transition-shadow bg-white"
                 aria-label="Open menu"
               >
-                <Menu className="h-4 w-4" />
-              </button>
-
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
-                aria-label="User profile"
-              >
+                <Menu className="h-4 w-4 text-gray-600" />
                 {user ? (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-sm font-bold text-white">
+                  <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <UserCircle className="h-8 w-8 text-gray-500" />
+                  <UserCircle className="h-[30px] w-[30px] text-gray-500" />
                 )}
               </button>
 
@@ -306,15 +304,14 @@ export default function Header() {
               <span className="h-8 w-px bg-gray-200" />
 
               {/* When */}
-              <button
-                type="button"
-                onClick={() => openField("when")}
-                className={`h-[62px] flex-1 rounded-full px-6 text-left transition ${
-                  activeField === "when" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
-                }`}
-              >
-                <span className="block text-xs font-bold text-gray-900">When</span>
-                <span className="text-sm text-gray-500">Add dates</span>
+              <button onClick={() => openField("when")} className={`flex-1 rounded-full px-6 py-3.5 text-left transition hover:bg-gray-200 ${activeField === "when" ? "bg-white shadow-md" : ""}`}>
+                <span className="block text-xs font-bold text-gray-800">Check in</span>
+                <span className="block text-sm text-gray-500 truncate">{selectedDate ? selectedDate : "Add dates"}</span>
+              </button>
+              <div className="h-8 w-px bg-gray-200" />
+              <button onClick={() => openField("when")} className={`flex-1 rounded-full px-6 py-3.5 text-left transition hover:bg-gray-200 ${activeField === "when" ? "bg-white shadow-md" : ""}`}>
+                <span className="block text-xs font-bold text-gray-800">Check out</span>
+                <span className="block text-sm text-gray-500 truncate">Add dates</span>
               </button>
 
               <span className="h-8 w-px bg-gray-200" />
@@ -388,6 +385,10 @@ export default function Header() {
                             <button
                               key={day}
                               disabled={disabled}
+                              onClick={() => {
+                                setSelectedDate(`${month.name.split(" ")[0]} ${day}`);
+                                setActiveField("who");
+                              }}
                               className={`aspect-square rounded-full text-sm font-medium ${
                                 disabled
                                   ? "text-gray-300 cursor-not-allowed"
