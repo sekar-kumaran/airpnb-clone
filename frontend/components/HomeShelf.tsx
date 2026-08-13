@@ -7,31 +7,33 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ListingCard as ListingCardType } from "@/types";
 import ListingCard from "@/components/ListingCard";
 
-// ── "See all" collage card (2×2 thumbnails — full height like real Airbnb) ────
+// ── "See all" collage card (stacked polaroids) ──────────────────────────────
 function SeeAllCard({ href, images }: { href: string; images: (string | null)[] }) {
-  const thumbs = images.filter(Boolean).slice(0, 4) as string[];
+  const thumbs = images.filter(Boolean).slice(0, 3) as string[];
 
   return (
     <Link
       href={href}
-      className="group relative h-[200px] w-[170px] shrink-0 overflow-hidden rounded-2xl transition hover:shadow-lg"
+      className="group flex h-[200px] w-[170px] shrink-0 flex-col items-center justify-center rounded-[20px] border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
     >
-      {/* 2×2 grid fills full card */}
-      <div className="grid h-full grid-cols-2 grid-rows-2 gap-0.5">
-        {[0, 1, 2, 3].map((i) =>
-          thumbs[i] ? (
-            <div key={i} className="relative overflow-hidden bg-gray-100">
-              <Image src={thumbs[i]} alt="" fill className="object-cover" sizes="85px" />
-            </div>
-          ) : (
-            <div key={i} className="bg-gray-200" />
-          )
+      <div className="relative mb-5 mt-2 h-[80px] w-[100px]">
+        {thumbs[0] && (
+          <div className="absolute -left-1 top-0 h-[68px] w-[76px] -rotate-[10deg] overflow-hidden rounded-[10px] border-[3px] border-white bg-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
+            <Image src={thumbs[0]} alt="" fill className="object-cover" sizes="80px" />
+          </div>
+        )}
+        {thumbs[1] && (
+          <div className="absolute -right-1 top-1.5 h-[68px] w-[76px] rotate-[10deg] overflow-hidden rounded-[10px] border-[3px] border-white bg-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.12)] z-10">
+            <Image src={thumbs[1]} alt="" fill className="object-cover" sizes="80px" />
+          </div>
+        )}
+        {thumbs[2] && (
+          <div className="absolute left-1/2 top-5 h-[68px] w-[76px] -translate-x-1/2 overflow-hidden rounded-[10px] border-[3px] border-white bg-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.15)] z-20">
+            <Image src={thumbs[2]} alt="" fill className="object-cover" sizes="80px" />
+          </div>
         )}
       </div>
-      {/* "See all" overlay at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center bg-gradient-to-t from-black/50 to-transparent pb-3 pt-6">
-        <span className="text-sm font-bold text-white drop-shadow">See all</span>
-      </div>
+      <span className="text-[15px] font-semibold text-gray-900 mt-2">See all</span>
     </Link>
   );
 }
