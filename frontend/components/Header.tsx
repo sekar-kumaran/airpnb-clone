@@ -205,7 +205,7 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Home className="h-4 w-4 text-primary" />
+                    <Image src="/icons/homes.png" alt="Homes" width={18} height={18} className="object-contain" unoptimized />
                     <span>Homes nearby</span>
                   </>
                 )}
@@ -235,27 +235,20 @@ export default function Header() {
               <Globe className="h-[18px] w-[18px]" />
             </button>
 
-            {/* Hamburger + user menu separate circles */}
+            {/* Hamburger + user menu pill */}
             <div className="relative flex items-center gap-2" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:shadow-md transition-shadow"
+                className="flex items-center gap-2 rounded-full border border-gray-300 bg-white p-2 pl-3 hover:shadow-md transition-shadow"
                 aria-label="Open menu"
               >
-                <Menu className="h-4 w-4" />
-              </button>
-
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
-                aria-label="User profile"
-              >
+                <Menu className="h-4 w-4 text-gray-800" />
                 {user ? (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-sm font-bold text-white">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-[10px] font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <UserCircle className="h-8 w-8 text-gray-500" />
+                  <UserCircle className="h-7 w-7 text-gray-500" />
                 )}
               </button>
 

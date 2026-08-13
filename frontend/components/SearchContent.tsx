@@ -15,8 +15,8 @@ function formatINR(n: number) {
 
 // ── Quick filter pills ────────────────────────────────────────────────────────
 const QUICK_FILTERS = [
-  "Allows pets", "Free parking", "Free cancellation", "1+ bathrooms",
-  "Air conditioning", "Hot tub", "Self check-in", "1+ beds", "Kitchen", "Wifi",
+  "Wifi", "Kitchen", "Free parking", "Pool", "Air conditioning",
+  "Washing machine", "2+ bedrooms", "Allows pets", "1+ bathrooms", "Instant Book"
 ];
 
 // ── Individual result card ────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ function ResultCard({ listing }: { listing: ListingCard }) {
   return (
     <div className="group">
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-[20/19] overflow-hidden rounded-xl bg-gray-100">
         {images[imgIndex] ? (
           <Image
             src={images[imgIndex]}
@@ -52,12 +52,16 @@ function ResultCard({ listing }: { listing: ListingCard }) {
           <Heart className={`h-6 w-6 drop-shadow-md ${saved ? "fill-primary stroke-primary" : "fill-black/30 stroke-white"}`} />
         </button>
 
-        {/* Guest favourite badge */}
-        {(listing.rating ?? 0) >= 4.9 && (
-          <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold shadow">
-            Guest favourite
+        {/* Badges */}
+        {(listing.rating ?? 0) >= 4.9 ? (
+          <span className="absolute left-3 top-3 flex items-center rounded-full bg-white px-3 py-1 text-[13px] font-bold shadow-md">
+            🏆 Guest favourite
           </span>
-        )}
+        ) : (listing.rating ?? 0) >= 4.8 ? (
+          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2 py-0.5 text-[12px] font-bold text-white shadow-sm backdrop-blur-sm">
+            Superhost
+          </span>
+        ) : null}
 
         {/* Image carousel dots */}
         {images.length > 1 && (
@@ -84,22 +88,28 @@ function ResultCard({ listing }: { listing: ListingCard }) {
       {/* Card info */}
       <Link href={`/listing/${listing.id}`} className="block pt-3">
         <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-sm font-semibold text-gray-900">{listing.title}</p>
+          <p className="truncate text-[15px] font-semibold text-gray-900">{listing.title}</p>
           {listing.rating && (
-            <div className="flex shrink-0 items-center gap-0.5 text-sm">
-              <Star className="h-3.5 w-3.5 fill-current text-gray-800" />
-              <span className="font-semibold">{listing.rating.toFixed(1)}</span>
-              <span className="text-gray-500">({listing.review_count})</span>
+            <div className="flex shrink-0 items-center gap-1 text-[15px]">
+              <Star className="h-3 w-3 fill-current text-gray-900" />
+              <span className="text-gray-900">{listing.rating.toFixed(2)}</span>
+              <span className="text-gray-900">({listing.review_count})</span>
             </div>
           )}
         </div>
-        <p className="mt-0.5 text-sm text-gray-500">{listing.city}, {listing.country}</p>
-        <p className="text-sm text-gray-500">1 bedroom · 1 bed · 1 bathroom</p>
-        <p className="mt-1 text-sm">
-          <span className="font-semibold">{formatINR(listing.price_per_night)}</span>{" "}
-          <span className="text-gray-500">for 1 night</span>
+        <p className="mt-0.5 truncate text-[15px] text-gray-500">
+          The Loft | Self Check-in | {listing.city}
         </p>
-        <p className="text-xs text-gray-500 mt-0.5">Free cancellation</p>
+        <p className="truncate text-[15px] text-gray-500">
+          1 bedroom · 1 king bed · 1 bathroom
+        </p>
+        <p className="truncate text-[15px] text-gray-500">
+          18-23 Aug
+        </p>
+        <div className="mt-1 flex items-baseline gap-1 text-[15px]">
+          <span className="font-semibold text-gray-900">{formatINR(listing.price_per_night)}</span>
+          <span className="text-gray-900">for 5 nights</span>
+        </div>
       </Link>
     </div>
   );
@@ -220,7 +230,7 @@ export default function SearchContent({ listings, total, page, limit, searchPara
           {/* Filters button */}
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="flex shrink-0 items-center gap-2 rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold hover:border-gray-600 transition"
+            className="flex shrink-0 items-center gap-2 rounded-full border border-gray-300 px-5 py-2 text-sm font-medium hover:border-gray-900 transition"
           >
             <SlidersHorizontal className="h-4 w-4" />
             Filters
@@ -231,10 +241,10 @@ export default function SearchContent({ listings, total, page, limit, searchPara
             <button
               key={f}
               onClick={() => toggleFilter(f)}
-              className={`shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition whitespace-nowrap ${
+              className={`shrink-0 rounded-full border px-5 py-2 text-sm transition whitespace-nowrap ${
                 activeFilters.includes(f)
-                  ? "border-gray-900 bg-gray-900 text-white"
-                  : "border-gray-200 hover:border-gray-400"
+                  ? "border-gray-900 bg-gray-100 text-gray-900 font-semibold"
+                  : "border-gray-300 hover:border-gray-900 font-medium"
               }`}
             >
               {f}
