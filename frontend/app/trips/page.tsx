@@ -1,22 +1,39 @@
-﻿"use client";
+"use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
+import { Booking } from "@/types";
 import { useToast } from "@/components/ToastProvider";
-import ConfirmDialog from "@/components/ConfirmDialog";
-import type { Booking } from "@/types";
+
+function formatINR(n: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(n);
+}
+
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
 
 export default function TripsPage() {
+  const router = useRouter();
+  const { showToast } = useToast();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bookingToCancel, setBookingToCancel] = useState<number | null>(null);
-  const { showToast } = useToast();
 
-  const fetchBookings = useCallback(async () => {
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      router.push("/");
+      return;
+    }
+    loadBookings();
+  }, [router]);
+
+  async function loadBookings() {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await api.myBookings();
       setBookings(data);
     } catch (err: any) {
@@ -24,123 +41,106 @@ export default function TripsPage() {
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }
 
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
-
-  const handleCancel = async (bookingId: number) => {
+  async function handleCancel(id: number) {
+    if (!window.confirm("Are you sure you want to cancel this reservation?")) return;
     try {
-      await api.cancelBooking(bookingId);
-      showToast("Reservation cancelled successfully", "success");
-      setBookingToCancel(null);
-      fetchBookings();
+      await api.cancelBooking(id);
+      showToast("Reservation cancelled", "success");
+      loadBookings();
     } catch (err: any) {
       showToast(err.message || "Failed to cancel reservation", "error");
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <h1 className="text-3xl font-bold mb-8">Trips</h1>
-        <div className="space-y-4">
-          {[1, 2].map((n) => (
-            <div key={n} className="h-32 bg-gray-100 animate-pulse rounded-2xl" />
-          ))}
+      <div className="mx-auto max-w-[1120px] px-6 py-12 lg:px-10">
+        <h1 className="mb-8 text-3xl font-semibold tracking-tight text-gray-900">Trips</h1>
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-8">Trips</h1>
+    <div className="mx-auto max-w-[1120px] px-6 py-12 lg:px-10 min-h-[60vh]">
+      <h1 className="mb-8 text-3xl font-semibold tracking-tight text-gray-900">Trips</h1>
 
       {bookings.length === 0 ? (
-        <div className="text-center py-16 border rounded-2xl bg-gray-50">
-          <h2 className="text-xl font-semibold mb-2">No trips booked... yet!</h2>
-          <p className="text-gray-500 mb-6">Time to dust off your bags and start planning your next adventure.</p>
+        <div className="rounded-2xl border border-gray-200 p-8 sm:p-12 text-center shadow-sm">
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900">No trips booked... yet!</h2>
+          <p className="mb-6 text-gray-600">Time to dust off your bags and start planning your next adventure.</p>
           <Link
-            href="/search"
-            className="inline-block px-6 py-3 bg-rose-500 text-white font-semibold rounded-xl hover:bg-rose-600 transition"
+            href="/"
+            className="inline-block rounded-xl border border-gray-900 px-6 py-3 font-semibold text-gray-900 transition hover:bg-gray-50"
           >
             Start searching
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {bookings.map((booking) => (
-            <div
-              key={booking.id}
-              className="border rounded-2xl overflow-hidden flex flex-col sm:flex-row shadow-sm hover:shadow-md transition"
-            >
-              <div className="relative w-full sm:w-48 h-48 sm:h-auto bg-gray-100 flex-shrink-0">
-                <Image
-                  src={booking.listing.cover_image || "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7"}
-                  alt={booking.listing.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              <div className="p-5 flex flex-col justify-between flex-grow">
-                <div>
-                  <div className="flex justify-between items-start">
-                    <span
-                      className={`text-xs font-bold uppercase px-2 py-0.5 rounded-md ${
-                        booking.status === "confirmed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                    <span className="text-xs text-gray-500">#{booking.id}</span>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {bookings.map((booking) => {
+            const isCancelled = booking.status === "cancelled";
+            const isPast = new Date(booking.check_out) < new Date();
+            
+            return (
+              <div key={booking.id} className={`group flex flex-col overflow-hidden rounded-2xl border border-gray-200 shadow-sm transition-shadow hover:shadow-md ${isCancelled ? 'opacity-60 grayscale' : ''}`}>
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                  {booking.listing.cover_image && (
+                    <Image
+                      src={booking.listing.cover_image}
+                      alt={booking.listing.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  )}
+                  {isCancelled && (
+                    <div className="absolute left-3 top-3 rounded-lg bg-gray-900/80 px-3 py-1 text-sm font-semibold text-white">
+                      Cancelled
+                    </div>
+                  )}
+                  {isPast && !isCancelled && (
+                    <div className="absolute left-3 top-3 rounded-lg bg-gray-900/80 px-3 py-1 text-sm font-semibold text-white">
+                      Past Trip
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{booking.listing.city}</p>
+                    <h3 className="line-clamp-1 text-base font-semibold text-gray-900">{booking.listing.title}</h3>
+                    <p className="mt-1 text-sm text-gray-600">
+                      {fmtDate(booking.check_in)} – {fmtDate(booking.check_out)}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-600">
+                      {booking.guests_count} guest{booking.guests_count > 1 ? "s" : ""}
+                    </p>
                   </div>
-
-                  <Link href={`/listing/${booking.listing.id}`} className="hover:underline">
-                    <h3 className="font-bold text-lg mt-2 line-clamp-1">{booking.listing.title}</h3>
-                  </Link>
-
-                  <p className="text-sm text-gray-500 mt-1">{booking.listing.location}</p>
-
-                  <div className="mt-3 text-sm space-y-1">
-                    <p>
-                      <span className="font-semibold">Dates:</span> {booking.check_in} to {booking.check_out}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Guests:</span> {booking.guests_count}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Total Price:</span> ${booking.total_price}
-                    </p>
+                  
+                  <div className="mt-auto border-t border-gray-100 pt-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-gray-900">{formatINR(booking.total_price)}</p>
+                      
+                      {!isCancelled && !isPast && (
+                        <button
+                          onClick={() => handleCancel(booking.id)}
+                          className="text-sm font-semibold text-[#E31C5F] hover:underline"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {booking.status === "confirmed" && (
-                  <button
-                    onClick={() => setBookingToCancel(booking.id)}
-                    className="mt-4 px-4 py-2 border border-gray-300 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition self-start"
-                  >
-                    Cancel Reservation
-                  </button>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      )}
-      {bookingToCancel !== null && (
-        <ConfirmDialog
-          title="Cancel this reservation?"
-          message="The trip will remain visible in your history with a cancelled status."
-          confirmLabel="Cancel reservation"
-          tone="danger"
-          onCancel={() => setBookingToCancel(null)}
-          onConfirm={() => handleCancel(bookingToCancel)}
-        />
       )}
     </div>
   );
