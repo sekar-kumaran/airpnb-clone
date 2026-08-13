@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Globe,
@@ -86,6 +86,7 @@ function Logo() {
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [isExpandedOverride, setIsExpandedOverride] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -103,7 +104,17 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeField, setActiveField] = useState<"where" | "when" | "who">("where");
-  const [activeMode, setActiveMode] = useState<"all" | "homes" | "experiences" | "services">("all");
+  
+  // Read activeMode from URL if present, otherwise default to "all"
+  const urlMode = searchParams.get("mode") as any;
+  const [activeMode, setActiveMode] = useState<"all" | "homes" | "experiences" | "services">(urlMode || "all");
+
+  // Keep activeMode in sync with URL if user navigates back/forward
+  useEffect(() => {
+    if (urlMode) setActiveMode(urlMode);
+    else setActiveMode("all");
+  }, [urlMode]);
+
   const [location, setLocation] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [adults, setAdults] = useState(0);
@@ -198,7 +209,10 @@ export default function Header() {
               {navLinks.map((link) => (
                 <button
                   key={link.id}
-                  onClick={() => setActiveMode(link.id as any)}
+                  onClick={() => {
+                    setActiveMode(link.id as any);
+                    router.push(`/?mode=${link.id}`);
+                  }}
                   className={`flex items-center gap-3 pb-3 transition ${
                     activeMode === link.id
                       ? "border-b-2 border-gray-900 text-gray-900"
