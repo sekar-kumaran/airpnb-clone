@@ -7,33 +7,35 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { ListingCard as ListingCardType } from "@/types";
 import ListingCard from "@/components/ListingCard";
 
-// ── "See all" collage card (2×2 thumbnails) ───────────────────────────────────
+// ── "See all" collage card (2×2 thumbnails — full height like real Airbnb) ────
 function SeeAllCard({ href, images }: { href: string; images: (string | null)[] }) {
   const thumbs = images.filter(Boolean).slice(0, 4) as string[];
 
   return (
     <Link
       href={href}
-      className="flex h-[200px] w-[170px] shrink-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+      className="group relative h-[200px] w-[170px] shrink-0 overflow-hidden rounded-2xl transition hover:shadow-lg"
     >
-      {/* 2×2 grid of thumbnails */}
-      <div className="grid h-[140px] shrink-0 grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-t-2xl">
+      {/* 2×2 grid fills full card */}
+      <div className="grid h-full grid-cols-2 grid-rows-2 gap-0.5">
         {[0, 1, 2, 3].map((i) =>
           thumbs[i] ? (
             <div key={i} className="relative overflow-hidden bg-gray-100">
               <Image src={thumbs[i]} alt="" fill className="object-cover" sizes="85px" />
             </div>
           ) : (
-            <div key={i} className="bg-gray-100" />
+            <div key={i} className="bg-gray-200" />
           )
         )}
       </div>
-      {/* Label */}
-      <div className="flex flex-1 flex-col items-center justify-center px-2">
-        <span className="text-sm font-bold text-gray-900">See all</span>
+      {/* "See all" overlay at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center bg-gradient-to-t from-black/50 to-transparent pb-3 pt-6">
+        <span className="text-sm font-bold text-white drop-shadow">See all</span>
       </div>
     </Link>
   );
+}
+
 }
 
 // ── HomeShelf ─────────────────────────────────────────────────────────────────
