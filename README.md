@@ -1,7 +1,7 @@
 # Airbnb Clone
 
 A functional Airbnb-style full-stack take-home project built with Next.js,
-FastAPI, and SQLite.
+FastAPI, and SQLite/Postgres.
 
 The app covers the main evaluator flow: browse seeded listings, search and
 filter stays, open a listing detail page, reserve available dates, view trips,
@@ -9,8 +9,8 @@ save wishlists, and manage host listings.
 
 ## Tech Stack
 - Frontend: Next.js 14 App Router, TypeScript, Tailwind CSS
-- Backend: FastAPI, SQLAlchemy, SQLite
-- DevOps: Docker Compose, GitHub Actions CI
+- Backend: FastAPI, SQLAlchemy, SQLite locally, Supabase Postgres in production
+- DevOps: Docker Compose, GitHub Actions CI, Jenkinsfile, Render/Vercel config, Kubernetes manifests
 - Auth: mocked email login with an `X-User-Id` request header
 
 ## Working Features
@@ -20,9 +20,14 @@ save wishlists, and manage host listings.
 - Trips page with cancellation flow using an in-app confirmation modal.
 - Wishlist page and heart toggle feedback via toasts.
 - Host dashboard with listing CRUD, reservation table, revenue, guest, and booking stats.
-- Seed data: 18 listings across multiple cities, 3 host users, 1 guest user, 8 bookings, and reviews.
+- Seed data: India-focused homes, experiences, services, host users, a guest user, bookings, and reviews.
 - Docker Compose setup for frontend and backend.
 - CI for backend ruff/pytest and frontend lint/typecheck/build.
+- Deployment-ready config for Vercel frontend, Render backend, Supabase Postgres, Jenkins, and Kubernetes.
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Vercel, Render, Supabase, Jenkins, GitHub Actions, and Kubernetes setup.
 
 ## Quick Start
 

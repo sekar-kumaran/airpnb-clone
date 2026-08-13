@@ -9,6 +9,10 @@ from app.routers import auth, listings, bookings, host, wishlist, reviews, meta
 # (e.g. altering an existing populated DB), add Alembic — noted as optional
 # in the master prompt, not required for this assignment's scope.
 Base.metadata.create_all(bind=engine)
+if settings.seed_on_start:
+    from app.seed import run as seed_database
+
+    seed_database()
 
 app = FastAPI(title="Airbnb Clone API")
 

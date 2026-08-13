@@ -15,6 +15,7 @@ out/
 
 # Runtime logs
 *.log
+k8s/backend-secret.yaml
 
 # Editors / OS
 .DS_Store
