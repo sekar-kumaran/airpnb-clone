@@ -178,13 +178,13 @@ export default function Header() {
                 <button
                   key={link.id}
                   onClick={() => setActiveMode(link.id as any)}
-                  className={`flex flex-col items-center gap-2 pb-2 transition ${
+                  className={`flex items-center gap-2 pb-2 transition ${
                     activeMode === link.id
                       ? "border-b-2 border-gray-900 text-gray-900"
                       : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"
                   }`}
                 >
-                  <link.icon className={`h-6 w-6 ${activeMode === link.id ? "text-gray-900" : "text-gray-500"}`} />
+                  <link.icon className={`h-5 w-5 ${activeMode === link.id ? "text-gray-900" : "text-gray-500"}`} />
                   <span className="text-sm font-semibold">{link.label}</span>
                 </button>
               ))}
@@ -223,20 +223,27 @@ export default function Header() {
               <Globe className="h-[18px] w-[18px]" />
             </button>
 
-            {/* Hamburger + user menu pill */}
-            <div className="relative" ref={menuRef}>
+            {/* Hamburger + user menu separate circles */}
+            <div className="relative flex items-center gap-2" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex h-[42px] items-center gap-3 rounded-full border border-gray-300 pl-3 pr-1 shadow-sm hover:shadow-md transition-shadow bg-white"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:shadow-md transition-shadow"
                 aria-label="Open menu"
               >
-                <Menu className="h-4 w-4 text-gray-600" />
+                <Menu className="h-4 w-4" />
+              </button>
+
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
+                aria-label="User profile"
+              >
                 {user ? (
-                  <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-sm font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 ) : (
-                  <UserCircle className="h-[30px] w-[30px] text-gray-500" />
+                  <UserCircle className="h-8 w-8 text-gray-500" />
                 )}
               </button>
 
@@ -304,14 +311,15 @@ export default function Header() {
               <span className="h-8 w-px bg-gray-200" />
 
               {/* When */}
-              <button onClick={() => openField("when")} className={`flex-1 rounded-full px-6 py-3.5 text-left transition hover:bg-gray-200 ${activeField === "when" ? "bg-white shadow-md" : ""}`}>
-                <span className="block text-xs font-bold text-gray-800">Check in</span>
-                <span className="block text-sm text-gray-500 truncate">{selectedDate ? selectedDate : "Add dates"}</span>
-              </button>
-              <div className="h-8 w-px bg-gray-200" />
-              <button onClick={() => openField("when")} className={`flex-1 rounded-full px-6 py-3.5 text-left transition hover:bg-gray-200 ${activeField === "when" ? "bg-white shadow-md" : ""}`}>
-                <span className="block text-xs font-bold text-gray-800">Check out</span>
-                <span className="block text-sm text-gray-500 truncate">Add dates</span>
+              <button
+                type="button"
+                onClick={() => openField("when")}
+                className={`flex-1 rounded-full px-6 py-3.5 text-left transition hover:bg-gray-200 ${
+                  activeField === "when" && searchOpen ? "bg-white shadow-md" : ""
+                }`}
+              >
+                <span className="block text-xs font-bold text-gray-900">When</span>
+                <span className="text-sm text-gray-500 truncate">{selectedDate ? selectedDate : "Add dates"}</span>
               </button>
 
               <span className="h-8 w-px bg-gray-200" />
