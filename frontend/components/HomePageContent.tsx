@@ -3,10 +3,7 @@ import Link from "next/link";
 import { api } from "@/lib/api-client";
 import type { ListingCard } from "@/types";
 import HomeShelf from "@/components/HomeShelf";
-import CategoryRail from "@/components/CategoryRail";
-import DestinationGrid from "@/components/DestinationGrid";
 import BecomeHostBanner from "@/components/BecomeHostBanner";
-import AirCoverSection from "@/components/AirCoverSection";
 import HomeFeePill from "@/components/HomeFeePill";
 import ListingCard from "@/components/ListingCard";
 
@@ -113,10 +110,9 @@ function GuestFavouritesGrid({ listings }: { listings: ListingCard[] }) {
 // ── Main component ────────────────────────────────────────────────────────────
 export default async function HomePageContent({ mode = "all" }: { mode?: HomeMode }) {
   // Fetch everything in parallel
-  const [{ results: allListings }, categories] = await Promise.all([
-    api.searchListings({ limit: 24 }).catch(() => ({ results: [], total: 0, page: 1, limit: 24 })),
-    api.getCategories().catch(() => []),
-  ]);
+  const { results: allListings } = await api
+    .searchListings({ limit: 24 })
+    .catch(() => ({ results: [], total: 0, page: 1, limit: 24 }));
 
   const sections = await Promise.all(
     MODE_SECTIONS[mode].map(async (section) => ({
@@ -127,43 +123,28 @@ export default async function HomePageContent({ mode = "all" }: { mode?: HomeMod
 
   return (
     <div className="bg-white">
-      {/* ── SECTION 1: Category Rail ─────────────────────────────────────── */}
-      <Suspense fallback={<div className="h-16 border-b border-gray-200" />}>
-        {categories.length > 0 && (
-          <CategoryRail categories={categories} />
-        )}
-      </Suspense>
-
       <div className="mx-auto max-w-[1760px] px-6 sm:px-10">
 
-        {/* ── SECTION 2: Explore Nearby (destination grid) ─────────────── */}
-        <DestinationGrid />
-
-        <div className="my-2 border-b border-gray-100" />
-
-        {/* ── SECTION 3: Listing Shelves (3–4 horizontal scrollable rows) ─ */}
+        {/* ── Listing Shelves ── */}
         <div className="py-10">
-          {sections.map((section, i) => (
-            <div key={section.title}>
-              <HomeShelf
-                title={section.title}
-                subtitle={section.subtitle}
-                listings={section.listings}
-                href={section.href}
-              />
-              {/* Insert AirCover banner between shelf 1 and 2 */}
-              {i === 0 && <AirCoverSection />}
-            </div>
+          {sections.map((section) => (
+            <HomeShelf
+              key={section.title}
+              title={section.title}
+              subtitle={section.subtitle}
+              listings={section.listings}
+              href={section.href}
+            />
           ))}
         </div>
 
-        {/* ── SECTION 4: Guest Favourites featured grid ─────────────────── */}
+        {/* ── Guest Favourites featured grid ── */}
         <GuestFavouritesGrid listings={allListings} />
 
-        {/* ── SECTION 5: Become a Host CTA ─────────────────────────────── */}
+        {/* ── Become a Host CTA ── */}
         <BecomeHostBanner />
 
-        {/* ── SECTION 6: "Prices include all fees" pill ────────────────── */}
+        {/* ── "Prices include all fees" pill ── */}
         <div className="py-4">
           <HomeFeePill />
         </div>
