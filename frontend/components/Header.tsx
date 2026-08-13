@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Globe,
   Home,
@@ -34,10 +35,10 @@ const DESTINATIONS = [
 ];
 
   const navLinks = [
-    { label: "All", icon: Globe, id: "all" },
-    { label: "Homes", icon: Home, id: "homes" },
-    { label: "Experiences", icon: Map, id: "experiences" },
-    { label: "Services", icon: Briefcase, id: "services" },
+    { label: "All", src: "/icons/all.png", id: "all" },
+    { label: "Homes", src: "/icons/homes.png", id: "homes" },
+    { label: "Experiences", src: "/icons/experiences.png", id: "experiences" },
+    { label: "Services", src: "/icons/services.png", id: "services" },
   ];
 
 // Build two consecutive months from today
@@ -184,7 +185,7 @@ export default function Header() {
                       : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"
                   }`}
                 >
-                  <link.icon className={`h-5 w-5 ${activeMode === link.id ? "text-gray-900" : "text-gray-500"}`} />
+                  <Image src={link.src} alt={link.label} width={24} height={24} className={`${activeMode === link.id ? "opacity-100 grayscale-0" : "opacity-60 grayscale"}`} unoptimized />
                   <span className="text-sm font-semibold">{link.label}</span>
                 </button>
               ))}
