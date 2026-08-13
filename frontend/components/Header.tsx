@@ -15,7 +15,9 @@ import {
   Building2,
   CalendarDays,
   CircleHelp,
-  LogOut
+  LogOut,
+  Minus,
+  Plus
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import AuthModal from "@/components/AuthModal";
@@ -326,10 +328,10 @@ export default function Header() {
               <span className="h-8 w-px bg-gray-200" />
 
               {/* Who */}
-              <button
-                type="button"
+              {/* Who */}
+              <div
                 onClick={() => openField("who")}
-                className={`h-[62px] flex-[1.4] flex items-center justify-between rounded-full pl-6 pr-3 transition ${
+                className={`cursor-pointer h-[62px] flex-[1.4] flex items-center justify-between rounded-full pl-6 pr-3 transition ${
                   activeField === "who" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
                 }`}
               >
@@ -343,7 +345,7 @@ export default function Header() {
                 >
                   <Search className="h-4 w-4" />
                 </button>
-              </button>
+              </div>
             </div>
 
             {/* ── Where dropdown ── */}
