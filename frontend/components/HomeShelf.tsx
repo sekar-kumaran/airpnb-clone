@@ -36,8 +36,6 @@ function SeeAllCard({ href, images }: { href: string; images: (string | null)[] 
   );
 }
 
-}
-
 // ── HomeShelf ─────────────────────────────────────────────────────────────────
 export default function HomeShelf({
   title,
