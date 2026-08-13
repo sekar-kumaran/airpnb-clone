@@ -75,22 +75,24 @@ export default function BookingCard({ listing }: BookingCardProps) {
     setCalOpen(false);
   }
 
-  function validate() {
+  function validateSelection() {
     if (!checkIn || !checkOut || nights <= 0) { showToast("Select check-in and checkout dates", "error"); return false; }
     if (rangeOverlaps(checkIn, checkOut, bookedRanges)) { showToast("Selected dates overlap with an existing booking.", "error"); return false; }
     if (guestsCount > listing.max_guests) { showToast(`Max ${listing.max_guests} guests allowed`, "error"); return false; }
     return true;
   }
 
-  async function confirmReservation() {
-    setLoading(true);
-    try {
-      await api.createBooking({ listing_id: listing.id, check_in: checkIn, check_out: checkOut, guests_count: guestsCount });
-      showToast("Booking confirmed!", "success");
-      router.push("/trips");
-    } catch (err: any) {
-      showToast(err.message || "Failed to create booking", "error");
-    } finally { setLoading(false); setConfirmOpen(false); }
+  function openConfirmation() {
+    if (validateSelection()) {
+      const p = new URLSearchParams();
+      p.set("checkin", checkIn);
+      p.set("checkout", checkOut);
+      p.set("adults", String(adults));
+      if (children > 0) p.set("children", String(children));
+      if (infants > 0) p.set("infants", String(infants));
+      if (pets > 0) p.set("pets", String(pets));
+      router.push(`/book/stays/${listing.id}?${p.toString()}`);
+    }
   }
 
   // Group calendar days by month for display
@@ -224,9 +226,8 @@ export default function BookingCard({ listing }: BookingCardProps) {
 
         {/* Reserve button */}
         <button
-          onClick={() => validate() && setConfirmOpen(true)}
-          disabled={loading}
-          className="mb-3 w-full rounded-xl bg-primary px-4 py-3.5 font-bold text-white shadow transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+          onClick={openConfirmation}
+          className="mb-3 w-full rounded-xl bg-primary px-4 py-3.5 font-bold text-white shadow transition hover:bg-primary/90 active:scale-[0.98]"
         >
           Reserve
         </button>
@@ -247,40 +248,6 @@ export default function BookingCard({ listing }: BookingCardProps) {
         <button className="mt-4 w-full text-center text-xs text-gray-400 hover:underline">Report this listing</button>
       </div>
 
-      {/* Confirm modal */}
-      {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="mb-5 flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Confirm and reserve</h2>
-                <p className="mt-1 text-sm text-gray-500">{listing.title}</p>
-              </div>
-              <button onClick={() => setConfirmOpen(false)} className="rounded-full p-2 hover:bg-gray-100"><X className="h-5 w-5" /></button>
-            </div>
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border p-3"><span className="block text-[10px] font-bold uppercase text-gray-500">Dates</span><span className="font-semibold">{fmtShort(checkIn)} – {fmtShort(checkOut)}</span></div>
-                <div className="rounded-xl border p-3"><span className="block text-[10px] font-bold uppercase text-gray-500">Guests</span><span className="font-semibold">{guestLabel}</span></div>
-              </div>
-              <div className="rounded-xl border p-4">
-                <p className="mb-3 font-semibold">Price details</p>
-                <div className="space-y-2 text-gray-600">
-                  <div className="flex justify-between"><span>{formatINR(listing.price_per_night)} × {nights} nights</span><span>{formatINR(basePrice)}</span></div>
-                  <div className="flex justify-between"><span>Cleaning fee</span><span>{formatINR(cleaningFee)}</span></div>
-                  <div className="flex justify-between"><span>Service fee</span><span>{formatINR(serviceFee)}</span></div>
-                  <div className="flex justify-between border-t pt-3 font-bold text-gray-900"><span>Total</span><span>{formatINR(totalPrice)}</span></div>
-                </div>
-              </div>
-              <p className="rounded-xl bg-gray-50 p-3 text-xs text-gray-600">Mock checkout — no real payment processed. Booking will persist and dates will be blocked.</p>
-            </div>
-            <button onClick={confirmReservation} disabled={loading}
-              className="mt-5 w-full rounded-xl bg-primary py-3 font-bold text-white hover:bg-primary/90 disabled:opacity-50">
-              {loading ? "Confirming…" : "Confirm reservation"}
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }

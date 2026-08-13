@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
+import AuthModal from "@/components/AuthModal";
 
 // ──────────────────────────────────────────────
 // Constants
@@ -100,6 +101,7 @@ export default function Header() {
 
   // Auth state
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
@@ -272,8 +274,8 @@ export default function Header() {
                     </>
                   ) : (
                     <>
-                      <Link href="/login" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm font-semibold hover:bg-gray-50">Log in</Link>
-                      <Link href="/signup" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">Sign up</Link>
+                      <button onClick={() => { setMenuOpen(false); setAuthOpen(true); }} className="block w-full text-left px-4 py-3 text-sm font-semibold hover:bg-gray-50">Log in</button>
+                      <button onClick={() => { setMenuOpen(false); setAuthOpen(true); }} className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-50">Sign up</button>
                       <div className="border-t my-1" />
                       <Link href="/host" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">
                         <span className="block font-semibold">Airbnb your home</span>
@@ -453,6 +455,7 @@ export default function Header() {
           </div>
         )}
       </div>
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} onSuccess={setUser} />
     </header>
   );
 }
