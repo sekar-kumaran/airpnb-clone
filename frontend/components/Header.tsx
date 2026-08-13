@@ -316,21 +316,7 @@ export default function Header() {
                   activeField === "when" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
                 }`}
               >
-                <span className="block text-xs font-bold text-gray-900">Check in</span>
-                <span className="text-sm text-gray-500">Add dates</span>
-              </button>
-
-              <span className="h-8 w-px bg-gray-200" />
-
-              {/* Checkout */}
-              <button
-                type="button"
-                onClick={() => openField("when")}
-                className={`h-[62px] flex-1 rounded-full px-6 text-left transition ${
-                  activeField === "when" && searchOpen ? "bg-white shadow-md" : "hover:bg-gray-50"
-                }`}
-              >
-                <span className="block text-xs font-bold text-gray-900">Check out</span>
+                <span className="block text-xs font-bold text-gray-900">When</span>
                 <span className="text-sm text-gray-500">Add dates</span>
               </button>
 
