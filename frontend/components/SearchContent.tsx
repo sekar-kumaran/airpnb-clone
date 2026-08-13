@@ -13,6 +13,12 @@ function formatINR(n: number) {
   }).format(n);
 }
 
+// ── Quick filter pills ────────────────────────────────────────────────────────
+const QUICK_FILTERS = [
+  "Beachfront", "Cabins", "Trending", "Amazing pools", "Mansions", "Design",
+  "Skiing", "Lakefront", "Castles", "Tiny homes",
+];
+
 // ── Individual result card ────────────────────────────────────────────────────
 function ResultCard({ listing }: { listing: ListingCard }) {
   const [saved, setSaved] = useState(false);
@@ -25,7 +31,7 @@ function ResultCard({ listing }: { listing: ListingCard }) {
   return (
     <div className="group">
       {/* Image */}
-      <div className="relative aspect-[20/19] overflow-hidden rounded-xl bg-gray-100">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
         <Link href={`/listing/${listing.id}`} className="absolute inset-0 z-10" />
         {images[imgIndex] ? (
           <Image
@@ -225,6 +231,16 @@ export default function SearchContent({ listings, total, page, limit, searchPara
             <SlidersHorizontal className="h-4 w-4" />
             Filters
           </button>
+
+          {/* Quick-filter pills */}
+          {QUICK_FILTERS.map((f) => (
+            <button
+              key={f}
+              className="shrink-0 rounded-full border border-gray-300 px-5 py-2 text-sm transition whitespace-nowrap hover:border-gray-900 font-medium"
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -267,7 +283,7 @@ export default function SearchContent({ listings, total, page, limit, searchPara
         </section>
 
         {/* Right: map */}
-        <aside className="sticky top-[146px] hidden h-[calc(100vh-146px)] lg:block pb-6 pr-6 xl:pr-20">
+        <aside className="sticky top-[146px] hidden h-[calc(100vh-146px)] lg:block pb-6 pr-6 xl:pr-20 pt-[88px]">
           <MapPanel listings={listings} />
         </aside>
       </div>
