@@ -196,15 +196,24 @@ export default function Header() {
             <button
               type="button"
               onClick={() => openField("where")}
-              className="hidden h-14 max-w-[500px] flex-1 items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition lg:flex"
+              className="hidden h-12 w-auto items-center rounded-full border border-gray-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.18)] transition lg:flex"
             >
-              <span className="flex min-w-0 flex-1 items-center gap-2 px-6 text-left text-[15px] font-semibold">
-                <span className="truncate">{location ? `Homes in ${location}` : "Anywhere"}</span>
+              <span className="flex items-center gap-2 pl-6 pr-4 text-[14px] font-semibold">
+                {location ? (
+                  <>
+                    <span className="truncate max-w-[200px]">{location}</span>
+                  </>
+                ) : (
+                  <>
+                    <Home className="h-4 w-4 text-primary" />
+                    <span>Homes nearby</span>
+                  </>
+                )}
               </span>
               <span className="h-6 w-px bg-gray-200" />
-              <span className="px-4 text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis">{selectedDate ? selectedDate : "Any week"}</span>
+              <span className="px-4 text-[14px] font-semibold whitespace-nowrap">{selectedDate ? selectedDate : "Any week"}</span>
               <span className="h-6 w-px bg-gray-200" />
-              <span className="px-4 text-sm font-semibold text-gray-500">{guestsLabel}</span>
+              <span className="pl-4 pr-2 text-[14px] font-semibold text-gray-500">{guestsLabel}</span>
               <span className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white">
                 <Search className="h-4 w-4" />
               </span>

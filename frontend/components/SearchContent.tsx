@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, SlidersHorizontal, Star, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { Heart, SlidersHorizontal, Star, ChevronLeft, ChevronRight, MapPin, Tag } from "lucide-react";
 import FilterModal from "@/components/FilterModal";
 import type { Category, ListingCard } from "@/types";
 
@@ -215,8 +215,8 @@ export default function SearchContent({ listings, total, page, limit, searchPara
   return (
     <div className="min-h-screen bg-white">
       {/* ── Filter row ── */}
-      <div className="sticky top-[72px] z-20 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-3 overflow-x-auto px-6 py-3 no-scrollbar">
+      <div className="sticky top-[86px] z-20 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-[1760px] items-center gap-3 overflow-x-auto px-6 py-4 md:px-10 xl:px-20 no-scrollbar">
           {/* Filters button */}
           <button
             onClick={() => setIsFilterOpen(true)}
@@ -246,14 +246,17 @@ export default function SearchContent({ listings, total, page, limit, searchPara
       {/* ── Two-column layout ── */}
       <div className="grid lg:grid-cols-[1fr_45%] lg:gap-0">
         {/* Left: results */}
-        <section className="min-h-screen px-6 py-8 lg:px-10">
+        <section className="min-h-screen px-6 py-8 md:px-10 xl:px-20 lg:pr-6">
           {/* Count */}
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900">
-              {total > 0 ? `${total.toLocaleString()} place${total !== 1 ? "s" : ""}` : "No places"} in {place}
+            <h1 className="text-xl font-bold text-gray-900">
+              {total > 0 ? `${total} homes` : "No homes found"}
             </h1>
-            <div className="hidden items-center gap-2 text-sm font-semibold md:flex">
-              <span>🏷️</span> Prices include all fees
+            <div className="flex items-center gap-2">
+              <span className="flex items-center text-pink-600">
+                <Tag className="mr-1 h-5 w-5 fill-pink-600 stroke-white stroke-1" />
+              </span>
+              <span className="text-sm font-semibold text-gray-900">Prices include all fees</span>
             </div>
           </div>
 
