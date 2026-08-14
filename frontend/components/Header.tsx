@@ -297,7 +297,7 @@ export default function Header() {
               </div>
 
               {menuOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-64 rounded-2xl bg-white py-2 shadow-2xl ring-1 ring-black/5">
+                <div className="absolute right-0 top-[100%] z-50 mt-2 w-64 rounded-2xl bg-white py-2 shadow-2xl ring-1 ring-black/5">
                   {user ? (
                     <>
                       <Link href="/wishlist" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Wishlists</Link>
