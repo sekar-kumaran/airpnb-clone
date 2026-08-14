@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Thin fetch wrapper for the FastAPI backend.
  *
  * Auth is mocked (see backend/app/routers/deps.py): once a user "logs in" we
@@ -8,7 +8,7 @@
  */
 import type { ListingCard, ListingDetail, Booking, User, SearchFilters } from "@/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://airpnb-clone-3o3u.onrender.com";
 
 function getCurrentUserId(): string | null {
   if (typeof window === "undefined") return null;
