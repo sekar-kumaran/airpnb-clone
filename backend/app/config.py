@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     """
     database_url: str = "sqlite:///./app.db"
     cors_origins: str = "http://localhost:3000"
-    seed_on_start: bool = False
+    seed_on_start: bool = True
 
     class Config:
         env_file = ".env"
