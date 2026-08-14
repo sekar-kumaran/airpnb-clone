@@ -4,7 +4,7 @@ This project is a functional, full-stack clone of the Airbnb web application bui
 
 ## 🚀 Live Deployments
 
-- **Frontend (Vercel):** [https://airpnb-clone.vercel.app/](https://airpnb-clone.vercel.app/)
+- **Frontend (Vercel):** [https://airbnb-clone-ten-murex-72.vercel.app/](https://airbnb-clone-ten-murex-72.vercel.app/)
 - **Backend (Render):** [https://airpnb-clone-3o3u.onrender.com](https://airpnb-clone-3o3u.onrender.com)
 - **API Docs:** [https://airpnb-clone-3o3u.onrender.com/docs](https://airpnb-clone-3o3u.onrender.com/docs)
 
