@@ -8,7 +8,7 @@
  */
 import type { ListingCard, ListingDetail, Booking, User, SearchFilters } from "@/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://airpnb-clone-3o3u.onrender.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function getCurrentUserId(): string | null {
   if (typeof window === "undefined") return null;
@@ -69,8 +69,15 @@ export const api = {
 
   // Wishlist
   getWishlist: () => request<ListingCard[]>("/api/wishlist"),
-  addToWishlist: (listingId: number) => request(`/api/wishlist/${listingId}`, { method: "POST" }),
-  removeFromWishlist: (listingId: number) => request(`/api/wishlist/${listingId}`, { method: "DELETE" }),
+  getWishlistFolders: () => request<{ name: string; count: number; cover_image: string | null }[]>("/api/wishlist/folders"),
+  getWishlistFolderItems: (folderName: string) => request<ListingCard[]>(`/api/wishlist/folders/${encodeURIComponent(folderName)}`),
+  addToWishlist: (listingId: number, folderName?: string) => 
+    request(`/api/wishlist/${listingId}`, { 
+      method: "POST",
+      body: folderName ? JSON.stringify({ folder_name: folderName }) : undefined
+    }),
+  removeFromWishlist: (listingId: number, folderName?: string) => 
+    request(`/api/wishlist/${listingId}${folderName ? `?folder_name=${encodeURIComponent(folderName)}` : ''}`, { method: "DELETE" }),
 
   // Auth (mocked)
   login: (email: string) => request<User>("/api/auth/login", { method: "POST", body: JSON.stringify({ email }) }),

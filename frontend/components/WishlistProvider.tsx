@@ -3,32 +3,33 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "@/lib/api-client";
 import { useToast } from "@/components/ToastProvider";
+import SaveToWishlistModal from "./SaveToWishlistModal";
 
 interface WishlistContextType {
   wishlist: Set<number>;
-  toggleWishlist: (listingId: number) => Promise<void>;
+  toggleWishlist: (listingId: number) => void;
+  refreshWishlist: () => Promise<void>;
   loading: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType>({
   wishlist: new Set(),
-  toggleWishlist: async () => {},
+  toggleWishlist: () => {},
+  refreshWishlist: async () => {},
   loading: false,
 });
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
+  const [activeModalListingId, setActiveModalListingId] = useState<number | null>(null);
   const { showToast } = useToast();
 
   useEffect(() => {
-    // Only load wishlist if user is logged in
     const userId = localStorage.getItem("userId");
     if (userId) {
       loadWishlist();
     }
-    // We poll localStorage occasionally or listen to an event if auth changes, 
-    // but a simple mount check is fine for this mock.
   }, []);
 
   async function loadWishlist() {
@@ -43,37 +44,25 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function toggleWishlist(listingId: number) {
+  function toggleWishlist(listingId: number) {
     const userId = localStorage.getItem("userId");
     if (!userId) {
       showToast("Please log in to save to your wishlist", "error");
       return;
     }
-
-    const isSaved = wishlist.has(listingId);
-    
-    // Optimistic update
-    const newWishlist = new Set(wishlist);
-    if (isSaved) newWishlist.delete(listingId);
-    else newWishlist.add(listingId);
-    setWishlist(newWishlist);
-
-    try {
-      if (isSaved) {
-        await api.removeFromWishlist(listingId);
-      } else {
-        await api.addToWishlist(listingId);
-      }
-    } catch (err: any) {
-      // Revert on failure
-      setWishlist(wishlist);
-      showToast("Failed to update wishlist", "error");
-    }
+    // Always open modal to manage folders
+    setActiveModalListingId(listingId);
   }
 
   return (
-    <WishlistContext.Provider value={{ wishlist, toggleWishlist, loading }}>
+    <WishlistContext.Provider value={{ wishlist, toggleWishlist, refreshWishlist: loadWishlist, loading }}>
       {children}
+      {activeModalListingId !== null && (
+        <SaveToWishlistModal 
+          listingId={activeModalListingId} 
+          onClose={() => setActiveModalListingId(null)} 
+        />
+      )}
     </WishlistContext.Provider>
   );
 }

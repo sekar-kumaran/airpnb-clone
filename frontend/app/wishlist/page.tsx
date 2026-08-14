@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
-import { ListingCard as ListingCardType } from "@/types";
-import ListingCard from "@/components/ListingCard";
 import { useWishlist } from "@/components/WishlistProvider";
 
 export default function WishlistPage() {
   const router = useRouter();
-  const { wishlist, loading: wishlistLoading } = useWishlist();
-  const [listings, setListings] = useState<ListingCardType[]>([]);
+  const { loading: wishlistLoading } = useWishlist();
+  const [folders, setFolders] = useState<{ name: string; count: number; cover_image: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,24 +18,20 @@ export default function WishlistPage() {
       router.push("/");
       return;
     }
-    loadWishlists();
+    loadFolders();
   }, [router]);
 
-  async function loadWishlists() {
+  async function loadFolders() {
     setLoading(true);
     try {
-      const data = await api.getWishlist();
-      setListings(data);
+      const data = await api.getWishlistFolders();
+      setFolders(data);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   }
-
-  // Filter listings based on the global wishlist state, so if they unlike it 
-  // on this page, it immediately disappears.
-  const displayListings = listings.filter((l) => wishlist.has(l.id));
 
   if (loading || wishlistLoading) {
     return (
@@ -54,7 +48,7 @@ export default function WishlistPage() {
     <div className="mx-auto max-w-[1120px] px-6 py-12 lg:px-10 min-h-[60vh]">
       <h1 className="mb-8 text-3xl font-semibold tracking-tight text-gray-900">Wishlists</h1>
 
-      {displayListings.length === 0 ? (
+      {folders.length === 0 ? (
         <div className="py-12">
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">Create your first wishlist</h2>
           <p className="mb-8 text-gray-600">
@@ -62,9 +56,24 @@ export default function WishlistPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:gap-x-8">
-          {displayListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:gap-x-6">
+          {folders.map((folder) => (
+            <Link key={folder.name} href={`/wishlist/${encodeURIComponent(folder.name)}`} className="group block">
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-200">
+                {folder.cover_image && (
+                  <img
+                    src={folder.cover_image}
+                    alt={folder.name}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105"
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
+              </div>
+              <div className="mt-4">
+                <h3 className="text-[22px] font-semibold text-gray-900">{folder.name}</h3>
+                <p className="text-sm text-gray-500">{folder.count} saved</p>
+              </div>
+            </Link>
           ))}
         </div>
       )}
