@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -18,7 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-screen flex-col bg-white text-gray-900 antialiased">
         <ToastProvider>
           <WishlistProvider>
-            <Header />
+            <Suspense fallback={<div className="h-20 border-b border-gray-200 bg-white" />}>
+              <Header />
+            </Suspense>
             <main className="flex-1">{children}</main>
             <Footer />
           </WishlistProvider>
