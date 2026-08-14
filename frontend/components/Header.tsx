@@ -281,19 +281,17 @@ export default function Header() {
                 >
                   <Menu className="h-5 w-5 text-gray-800" />
                 </button>
-                <button
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex h-[46px] w-[46px] items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
-                  aria-label="User profile"
-                >
-                  {user ? (
+                {user && (
+                  <button
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="flex h-[46px] w-[46px] items-center justify-center rounded-full border border-gray-300 bg-white hover:shadow-md transition-shadow"
+                    aria-label="User profile"
+                  >
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-[12px] font-bold text-white">
                       {user.name.charAt(0).toUpperCase()}
                     </span>
-                  ) : (
-                    <UserCircle className="h-8 w-8 text-gray-500" />
-                  )}
-                </button>
+                  </button>
+                )}
               </div>
 
               {menuOpen && (
