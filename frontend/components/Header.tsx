@@ -103,6 +103,23 @@ export default function Header() {
   // UI state
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  const handleBecomeHost = async () => {
+    if (user) {
+      try {
+        const updatedUser = await api.becomeHost();
+        setUser(updatedUser);
+        router.push("/host/listings/new");
+        setMenuOpen(false);
+      } catch (err) {
+        console.error("Failed to become host", err);
+      }
+    } else {
+      setMenuOpen(false);
+      setAuthOpen(true);
+    }
+  };
+  
   const [activeField, setActiveField] = useState<"where" | "when" | "who">("where");
   
   // Read activeMode from URL if present, otherwise default to "all"
@@ -258,12 +275,12 @@ export default function Header() {
 
           {/* Right: host link + lang + menu */}
           <div className="flex flex-1 items-center justify-end gap-2">
-            <Link
-              href="/host"
+            <button
+              onClick={handleBecomeHost}
               className="hidden rounded-full px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 md:block"
             >
               Become a host
-            </Link>
+            </button>
             <button
               className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 md:flex"
               aria-label="Language"
@@ -308,10 +325,10 @@ export default function Header() {
                       <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Languages & currency</Link>
                       <Link href="#" className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Help Centre</Link>
                       <div className="border-t my-2" />
-                      <Link href="/host/listings/new" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">
+                      <button onClick={handleBecomeHost} className="block w-full px-4 py-[10px] text-left text-[15px] hover:bg-gray-50">
                         Become a host
                         <span className="block text-[13px] text-gray-500">It&apos;s easy to start hosting</span>
-                      </Link>
+                      </button>
                       <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Refer a host</Link>
                       <Link href="#" onClick={() => setMenuOpen(false)} className="block px-4 py-[10px] text-[15px] hover:bg-gray-50">Find a co-host</Link>
                       <div className="border-t my-2" />
@@ -324,10 +341,10 @@ export default function Header() {
                       <button onClick={() => { setMenuOpen(false); setAuthOpen(true); }} className="block w-full text-left px-4 py-3 text-sm font-semibold hover:bg-gray-50">Log in</button>
                       <button onClick={() => { setMenuOpen(false); setAuthOpen(true); }} className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-50">Sign up</button>
                       <div className="border-t my-1" />
-                      <Link href="/host" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-sm hover:bg-gray-50">
+                      <button onClick={handleBecomeHost} className="block w-full text-left px-4 py-3 text-sm hover:bg-gray-50">
                         <span className="block font-semibold">Airbnb your home</span>
                         <span className="text-xs text-gray-500">It&apos;s easy to start hosting</span>
-                      </Link>
+                      </button>
                       <Link href="#" className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-50">
                         <CircleHelp className="h-4 w-4" />Help Centre
                       </Link>

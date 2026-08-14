@@ -84,6 +84,7 @@ export const api = {
   signup: (name: string, email: string) =>
     request<User>("/api/auth/signup", { method: "POST", body: JSON.stringify({ name, email }) }),
   me: () => request<User>("/api/auth/me"),
+  becomeHost: () => request<User>("/api/auth/become-host", { method: "POST" }),
 
   // Meta
   getAmenities: () => request<{ id: number; name: string; icon: string | null }[]>("/api/amenities"),

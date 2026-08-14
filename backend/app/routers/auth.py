@@ -31,3 +31,11 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return user
+
+@router.post("/become-host", response_model=UserOut)
+def become_host(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.is_host:
+        user.is_host = True
+        db.commit()
+        db.refresh(user)
+    return user
